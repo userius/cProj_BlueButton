@@ -1,5 +1,10 @@
 /.mxproject
 /cProj_BlueButton.ioc
-/eide
+/__eide
+/build
+/.cmsis
+/.eide
+/.vscode
 /MDK-ARM
 /__wf
+/.eide.usr.ctx.json
