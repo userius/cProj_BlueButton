@@ -43,6 +43,7 @@
 static void          _dom_all_pins_init( phDOM_t ph );
 static void          _dom_all_pins_update( phDOM_t ph );
 __STATIC_INLINE void _dom_start_timer( uint16_t *counter, uint16_t value, bool mode );
+__STATIC_INLINE bool _dom_timer_expired( uint16_t *counter );
 __STATIC_INLINE bool _dom_get_signal( phDOM_t ph, uint8_t Ch, eDOM_InSig_t InSigType );
 __STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
                                            bool Activate, bool Deactivate );
@@ -226,63 +227,6 @@ static void _dom_all_pins_update( phDOM_t ph ) {
 }
 
 /** --------------------------------------------------------------------------
- * @brief Start a timer or ignore based on restart mode
- * @param counter Pointer to the timer counter variable
- * @param value   Timer value to set (in ticks)
- * @param mode    Timer restart mode (DOM_TIM_MODE_RESTART or DOM_TIM_MODE_IGNORE)
- */
-__STATIC_INLINE void _dom_start_timer( uint16_t *counter, uint16_t value, bool mode ) {
-  if ( value == 0 ) {
-    *counter = 0;     // Immediate action
-    return;
-  }
-  if ( *counter == 0 || mode == DOM_TIM_MODE_RESTART ) { *counter = value; }
-}
-
-/** --------------------------------------------------------------------------
- * @brief Process a single channel's logic
- * @param ph          Pointer to the DOM handler
- * @param ChID        Channel index (0 to QnttOuts-1)
- * @param Activate    True if activation signal is present
- * @param Deactivate  True if deactivation signal is present
- * @return            True if channel should be active, false otherwise
- */
-__STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
-                                           bool Activate, bool Deactivate ) {
-  //
-  psDOM_ChSt_t   _psChSt   = &ph->aChState[ ChID ];
-  puDOM_TimCfg_t _puCfgTDA = &ph->psCfg->asChCfg[ ChID ].uCfgTDA;
-  puDOM_TimCfg_t _puCfgTHO = &ph->psCfg->asChCfg[ ChID ].uCfgTHO;
-  bool           _IsActive = 0 != ( ph->OutStates & ( 1U << ChID ) );
-
-  if ( Activate ) {       // Activation event
-    if ( !_IsActive )     //
-      _dom_start_timer( &_psChSt->tda_counter, _puCfgTDA->Ticks, _puCfgTDA->Mode );
-  }
-
-  if ( Deactivate ) {      // Deactivation event
-    if ( _IsActive ) {     //
-      _IsActive            = false;
-      _psChSt->tda_counter = 0;
-      _psChSt->tho_counter = 0;
-    }
-  }
-
-  if ( !_IsActive && _psChSt->tda_counter > 0 ) {     // TDA handling
-    if ( --_psChSt->tda_counter == 0 ) {
-      _IsActive = true;
-      _dom_start_timer( &_psChSt->tho_counter, _puCfgTHO->Ticks, _puCfgTHO->Mode );
-    }
-  }
-
-  if ( _IsActive && _puCfgTHO->Ticks > 0 && _psChSt->tho_counter > 0 )     // THO handling
-    if ( --_psChSt->tho_counter == 0 )                                     //
-      _IsActive = false;
-
-  return _IsActive;
-}
-
-/** --------------------------------------------------------------------------
  * @brief   Retrieve the current state of a specified input signal.
  * @param   ph         Pointer to the DOM handler structure (hDOM_t).
  * @param   Ch         Channel index (0 to QnttOuts-1).
@@ -306,3 +250,89 @@ __STATIC_INLINE bool _dom_get_signal( phDOM_t ph, uint8_t Ch, eDOM_InSig_t InSig
 
   return 0 != ( _Sigs & ( 1U << puSig->ChanID ) );
 }
+
+/** --------------------------------------------------------------------------
+ * @brief Start (or optionally restart) a timer according to restart mode.
+ * @param counter Pointer to the timer countdown register
+ * @param ticks   Duration in ticks (0 => disabled/immediate).
+ * @param mode    Timer restart mode (DOM_TIM_MODE_RESTART or DOM_TIM_MODE_IGNORE)
+ */
+__STATIC_INLINE void _dom_start_timer( uint16_t *counter, uint16_t ticks, bool mode ) {
+  if ( ticks == 0 ) {     // timer disabled => no counting
+    *counter = 0;         // Immediate action
+    return;
+  }
+  if ( *counter == 0 || mode == DOM_TIM_MODE_RESTART ) { *counter = ticks; }
+}
+
+/** \brief Tick a countdown timer and report expiration.
+ *  \param[in,out] counter  Pointer to countdown in ticks (saturates at 0).
+ *  \return true  if it just reached 0 on this call,
+ *          false otherwise.
+ */
+__STATIC_INLINE bool _dom_timer_expired( uint16_t *counter ) {
+  if ( *counter == 0U ) return false;
+  ( *counter )--;
+  return ( *counter == 0U );
+}
+
+/** \brief Process one DOM channel state machine for this tick.
+ *  \param[in,out] ph          DOM handle.
+ *  \param[in]     ChID        Channel index [0..QnttOuts-1].
+ *  \param[in]     Activate    Activation event (EdgeRise/Fall/Any per config).
+ *  \param[in]     Deactivate  Deactivation event (EdgeRise/Fall/Any per config).
+ *  \return        New output state for this channel (true = active).
+ */
+__STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID, bool Activate,
+                                           bool Deactivate ) {
+  sDOM_ChSt_t   *psChSt   = &ph->aChState[ ChID ];
+  uDOM_TimCfg_t *puCfgTDA = &ph->psCfg->asChCfg[ ChID ].uCfgTDA;
+  uDOM_TimCfg_t *puCfgTHO = &ph->psCfg->asChCfg[ ChID ].uCfgTHO;
+
+  bool isActive = ( ph->OutStates & ( 1U << ChID ) ) != 0U;
+
+  /* Immediate deactivation path: cancels both timers and forces output low. */
+  if ( Deactivate ) {
+    if ( isActive ) { isActive = false; }
+    psChSt->tda_counter = 0U;
+    psChSt->tho_counter = 0U;
+  }
+
+  /* Activation handling. */
+  if ( Activate ) {
+    if ( !isActive ) {
+      /* If no TDA configured => activate immediately and start THO right away. */
+      if ( puCfgTDA->Ticks == 0U ) {
+        isActive = true;
+        _dom_start_timer( &psChSt->tho_counter, puCfgTHO->Ticks, puCfgTHO->Mode );
+      }
+      else {
+        /* TDA is used => (re)start depending on restart mode. */
+        _dom_start_timer( &psChSt->tda_counter, puCfgTDA->Ticks, puCfgTDA->Mode );
+      }
+    }
+    else {
+      /* Already active: allow THO retrigger per its restart mode (if THO is used). */
+      if ( puCfgTHO->Ticks > 0U ) {
+        _dom_start_timer( &psChSt->tho_counter, puCfgTHO->Ticks, puCfgTHO->Mode );
+      }
+    }
+  }
+
+  /* TDA countdown & arming THO upon expiry (only when currently inactive). */
+  if ( !isActive && ( psChSt->tda_counter > 0U ) ) {
+    if ( _dom_timer_expired( &psChSt->tda_counter ) ) {
+      isActive = true;
+      _dom_start_timer( &psChSt->tho_counter, puCfgTHO->Ticks, puCfgTHO->Mode );
+    }
+  }
+
+  /* THO countdown & auto-deactivate upon expiry (only when THO is actually used). */
+  if ( isActive && ( puCfgTHO->Ticks > 0U ) && ( psChSt->tho_counter > 0U ) ) {
+    if ( _dom_timer_expired( &psChSt->tho_counter ) ) { isActive = false; }
+  }
+
+  return isActive;
+}
+
+// --- end of file ----------------------------------------------------------------
