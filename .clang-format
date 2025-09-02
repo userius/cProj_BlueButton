@@ -1,0 +1,103 @@
+###########################################################
+# https://zed0.co.uk/clang-format-configurator/
+###########################################################
+BasedOnStyle: MICROSOFT
+Language: Cpp
+Standard: Cpp03
+###########################################################
+#AccessModifierOffset: '0'
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: 'true'
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
+AlignEscapedNewlines: Right
+AlignOperands: 'true'
+AlignTrailingComments: 'true'
+#AllowAllArgumentsOnNextLine: 'true'
+#AllowAllParametersOfDeclarationOnNextLine: 'true'
+#AllowAllConstructorInitializersOnNextLine: 'false'
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: 'true'
+##AlwaysBreakAfterDefinitionReturnType: None # All TopLevel
+#AlwaysBreakAfterReturnType: TopLevelDefinitions #None
+#AlwaysBreakBeforeMultilineStrings: 'false'
+#AlwaysBreakTemplateDeclarations: MultiLine
+#BinPackArguments: 'true'
+#BinPackParameters: 'true'
+BraceWrapping:
+    AfterClass: 'false'
+    AfterControlStatement: 'false'
+    AfterEnum: 'false'
+    AfterFunction: 'false'
+#    AfterNamespace: 'false'
+#    AfterObjCDeclaration: 'false'
+    AfterStruct: 'false'
+    AfterUnion: 'false'
+#    BeforeCatch: 'true'
+    BeforeElse: 'true'
+#    IndentBraces: 'true'
+#BreakAfterJavaFieldAnnotations: 'true'
+#BreakBeforeBinaryOperators: None
+#BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: 'false'
+#BreakConstructorInitializers: AfterColon
+#BreakInheritanceList: AfterColon
+#BreakStringLiterals: 'true'
+ColumnLimit: '100'
+#ContinuationIndentWidth: '0'
+#Cpp11BracedListStyle: 'false'
+# CommentPragmas: '^ IWYU pragma:'
+# ConstructorInitializerAllOnOneLineOrOnePerLine: false
+# ConstructorInitializerIndentWidth: 8
+# ContinuationIndentWidth: 8
+#DerivePointerAlignment: 'true'
+# DisableFormat: false
+# ExperimentalAutoDetectBinPacking: false
+#FixNamespaceComments: 'true'
+IndentCaseLabels: 'true'
+#IndentPPDirectives: BeforeHash
+IndentWidth: '2'
+#IndentWrappedFunctionNames: 'false'
+#JavaScriptQuotes: Double
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+MaxEmptyLinesToKeep: 1
+#NamespaceIndentation: All
+#ObjCBinPackProtocolList: Auto
+#ObjCBlockIndentWidth: '2'
+#ObjCSpaceAfterProperty: 'true'
+#ObjCSpaceBeforeProtocolList: 'true'
+#PenaltyBreakAssignment: '0'
+#PenaltyBreakBeforeFirstCallParameter: '0'
+#PenaltyBreakComment: '0'
+#PenaltyBreakFirstLessLess: '0'
+#PenaltyBreakString: '0'
+#PenaltyBreakTemplateDeclaration: '0'
+#PenaltyExcessCharacter: '0'
+#PenaltyReturnTypeOnItsOwnLine: '0'
+#PointerAlignment: Right
+ReflowComments: 'true'
+SortIncludes: 'false'
+#SortUsingDeclarations: 'true'
+SpaceAfterCStyleCast: 'true'
+#SpaceAfterLogicalNot: 'false'
+#SpaceAfterTemplateKeyword: 'true'
+#SpaceBeforeAssignmentOperators: 'true'
+#SpaceBeforeCpp11BracedList: 'true'
+#SpaceBeforeCtorInitializerColon: 'true'
+#SpaceBeforeInheritanceColon: 'true'
+SpaceBeforeParens: ControlStatements
+#SpaceBeforeRangeBasedForLoopColon: 'false'
+SpaceInEmptyParentheses: 'true'
+SpacesBeforeTrailingComments: '5'
+#SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+#SpacesInContainerLiterals: 'true'
+SpacesInParentheses: 'true'
+SpacesInSquareBrackets: 'true'
+#Standard: Cpp03
+#TabWidth: '2'
+UseTab: Never
