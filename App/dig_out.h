@@ -79,12 +79,16 @@ extern "C"
     uint16_t     OutsMaskXOR;            //
   } sDOM_Cfg_t, *psDOM_Cfg_t;            // 98 bytes
 
+  typedef struct _dom_timer_state {     //
+    uint16_t Counter;                   // countdown in ticks (saturates at 0)
+  } sDOM_TimSt_t, *psDOM_TimSt_t;
+
   /**
    * @brief Runtime state for a single channel
    */
   typedef struct _channel_state {
-    uint16_t tda_counter;     ///< TDA countdown
-    uint16_t tho_counter;     ///< THO countdown
+    sDOM_TimSt_t sTDA;     ///< TDA countdown
+    sDOM_TimSt_t sTHO;     ///< THO countdown
   } sDOM_ChSt_t, *psDOM_ChSt_t;
 
   /**

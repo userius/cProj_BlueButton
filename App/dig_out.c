@@ -42,8 +42,11 @@
 /** Static function prototypes ***********************************************/
 static void          _dom_all_pins_init( phDOM_t ph );
 static void          _dom_all_pins_update( phDOM_t ph );
-__STATIC_INLINE void _dom_start_timer( uint16_t *counter, uint16_t value, bool mode );
-__STATIC_INLINE bool _dom_timer_expired( uint16_t *counter );
+__STATIC_INLINE bool _dom_tim_expired( psDOM_TimSt_t ps );
+__STATIC_INLINE void _dom_tim_start( psDOM_TimSt_t ps, puDOM_TimCfg_t puCfg );
+__STATIC_INLINE void _dom_tim_reset( psDOM_TimSt_t ps );
+__STATIC_INLINE bool _dom_tim_is_counting( psDOM_TimSt_t ps );
+__STATIC_INLINE bool _dom_tim_is_configured( puDOM_TimCfg_t pu );
 __STATIC_INLINE bool _dom_get_signal( phDOM_t ph, uint8_t Ch, eDOM_InSig_t InSigType );
 __STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
                                            bool Activate, bool Deactivate );
@@ -253,86 +256,123 @@ __STATIC_INLINE bool _dom_get_signal( phDOM_t ph, uint8_t Ch, eDOM_InSig_t InSig
 
 /** --------------------------------------------------------------------------
  * @brief Start (or optionally restart) a timer according to restart mode.
- * @param counter Pointer to the timer countdown register
- * @param ticks   Duration in ticks (0 => disabled/immediate).
- * @param mode    Timer restart mode (DOM_TIM_MODE_RESTART or DOM_TIM_MODE_IGNORE)
+ * @param ps      Pointer to the timer state structure.
+ * @param puCfg   Pointer to the timer configuration structure.
  */
-__STATIC_INLINE void _dom_start_timer( uint16_t *counter, uint16_t ticks, bool mode ) {
-  if ( ticks == 0 ) {     // timer disabled => no counting
-    *counter = 0;         // Immediate action
+__STATIC_INLINE void _dom_tim_start( psDOM_TimSt_t ps, puDOM_TimCfg_t puCfg ) {
+  //
+  if ( !_dom_tim_is_configured( puCfg ) ) {     // timer disabled => no counting
+    _dom_tim_reset( ps );                       // Immediate action
     return;
   }
-  if ( *counter == 0 || mode == DOM_TIM_MODE_RESTART ) { *counter = ticks; }
+  if ( !_dom_tim_is_counting( ps ) ||            // timer is not running or
+       puCfg->Mode == DOM_TIM_MODE_RESTART )     // restart mode
+    ps->Counter = puCfg->Ticks;                  // set timer to configured value
+  return;
 }
 
-/** \brief Tick a countdown timer and report expiration.
- *  \param[in,out] counter  Pointer to countdown in ticks (saturates at 0).
- *  \return true  if it just reached 0 on this call,
- *          false otherwise.
+/** --------------------------------------------------------------------------
+ * @brief   Tick a countdown timer and report expiration.
+ * @param   ps  Pointer to timer state structure.
+ * @return  true if it just reached 0 on this call, false otherwise.
  */
-__STATIC_INLINE bool _dom_timer_expired( uint16_t *counter ) {
-  if ( *counter == 0U ) return false;
-  ( *counter )--;
-  return ( *counter == 0U );
+__STATIC_INLINE bool _dom_tim_expired( psDOM_TimSt_t ps ) {
+  //
+  if ( ps->Counter == 0U ) return false;
+  ps->Counter--;
+  return ( ps->Counter == 0U );
 }
 
-/** \brief Process one DOM channel state machine for this tick.
- *  \param[in,out] ph          DOM handle.
- *  \param[in]     ChID        Channel index [0..QnttOuts-1].
- *  \param[in]     Activate    Activation event (EdgeRise/Fall/Any per config).
- *  \param[in]     Deactivate  Deactivation event (EdgeRise/Fall/Any per config).
- *  \return        New output state for this channel (true = active).
+/** --------------------------------------------------------------------------
+ * @brief   Check if a timer is counting (Counter > 0).
+ * @param   ps  Pointer to timer state structure.
+ * @return  true if the timer is counting, false if it is stopped (Counter==0).
  */
-__STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID, bool Activate,
-                                           bool Deactivate ) {
-  sDOM_ChSt_t   *psChSt   = &ph->aChState[ ChID ];
-  uDOM_TimCfg_t *puCfgTDA = &ph->psCfg->asChCfg[ ChID ].uCfgTDA;
-  uDOM_TimCfg_t *puCfgTHO = &ph->psCfg->asChCfg[ ChID ].uCfgTHO;
+__STATIC_INLINE bool _dom_tim_is_counting( psDOM_TimSt_t ps ) {
+  //
+  return ( ps->Counter != 0U );
+}
 
-  bool isActive = ( ph->OutStates & ( 1U << ChID ) ) != 0U;
+/** --------------------------------------------------------------------------
+ * @brief   Check if a timer is configured (Ticks > 0).
+ * @param   pu  Pointer to timer configuration structure.
+ */
+__STATIC_INLINE bool _dom_tim_is_configured( puDOM_TimCfg_t pu ) {
+  //
+  return ( pu->Ticks != 0U );
+}
+
+/** --------------------------------------------------------------------------
+ * @brief   Reset a countdown timer register.
+ * @param   ps  Pointer to timer state structure.
+ */
+__STATIC_INLINE void _dom_tim_reset( psDOM_TimSt_t ps ) {
+  //
+  ps->Counter = 0U;
+  return;
+}
+
+/** --------------------------------------------------------------------------
+ *  @brief Process one DOM channel state machine for this tick.
+ *  @param  ph          DOM handle.
+ *  @param  ChID        Channel index [0..QnttOuts-1].
+ *  @param  Activate    Activation event (EdgeRise/Fall/Any per config).
+ *  @param  Deactivate  Deactivation event (EdgeRise/Fall/Any per config).
+ *  @return New output state for this channel (true = active).
+ */
+__STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
+                                           bool Activate, bool Deactivate ) {
+  // Local pointers to channel state and configuration for convenience.
+  psDOM_TimSt_t  _psTDA    = &ph->aChState[ ChID ].sTDA;
+  psDOM_TimSt_t  _psTHO    = &ph->aChState[ ChID ].sTHO;
+  puDOM_TimCfg_t _puCfgTDA = &ph->psCfg->asChCfg[ ChID ].uCfgTDA;
+  puDOM_TimCfg_t _puCfgTHO = &ph->psCfg->asChCfg[ ChID ].uCfgTHO;
+
+  bool _IsActive = ( ph->OutStates & ( 1U << ChID ) ) != 0U;
 
   /* Immediate deactivation path: cancels both timers and forces output low. */
   if ( Deactivate ) {
-    if ( isActive ) { isActive = false; }
-    psChSt->tda_counter = 0U;
-    psChSt->tho_counter = 0U;
+    if ( _IsActive ) { _IsActive = false; }
+    _dom_tim_reset( _psTDA );
+    _dom_tim_reset( _psTHO );
   }
 
   /* Activation handling. */
   if ( Activate ) {
-    if ( !isActive ) {
+    if ( !_IsActive ) {
       /* If no TDA configured => activate immediately and start THO right away. */
-      if ( puCfgTDA->Ticks == 0U ) {
-        isActive = true;
-        _dom_start_timer( &psChSt->tho_counter, puCfgTHO->Ticks, puCfgTHO->Mode );
+      if ( !_dom_tim_is_configured( _puCfgTDA ) ) {
+        _IsActive = true;
+        _dom_tim_start( _psTHO, _puCfgTHO );
       }
       else {
         /* TDA is used => (re)start depending on restart mode. */
-        _dom_start_timer( &psChSt->tda_counter, puCfgTDA->Ticks, puCfgTDA->Mode );
+        _dom_tim_start( _psTDA, _puCfgTDA );
       }
     }
     else {
       /* Already active: allow THO retrigger per its restart mode (if THO is used). */
-      if ( puCfgTHO->Ticks > 0U ) {
-        _dom_start_timer( &psChSt->tho_counter, puCfgTHO->Ticks, puCfgTHO->Mode );
-      }
+      if ( _dom_tim_is_configured( _puCfgTHO ) )     //
+        _dom_tim_start( _psTHO, _puCfgTHO );
     }
   }
 
   /* TDA countdown & arming THO upon expiry (only when currently inactive). */
-  if ( !isActive && ( psChSt->tda_counter > 0U ) ) {
-    if ( _dom_timer_expired( &psChSt->tda_counter ) ) {
-      isActive = true;
-      _dom_start_timer( &psChSt->tho_counter, puCfgTHO->Ticks, puCfgTHO->Mode );
+  if ( !_IsActive && _dom_tim_is_counting( _psTDA ) ) {
+    if ( _dom_tim_expired( _psTDA ) ) {
+      _IsActive = true;
+      _dom_tim_start( _psTHO, _puCfgTHO );
     }
   }
 
   /* THO countdown & auto-deactivate upon expiry (only when THO is actually used). */
-  if ( isActive && ( puCfgTHO->Ticks > 0U ) && ( psChSt->tho_counter > 0U ) ) {
-    if ( _dom_timer_expired( &psChSt->tho_counter ) ) { isActive = false; }
-  }
+  if ( _IsActive &&                               //
+       _dom_tim_is_configured( _puCfgTHO ) &&     //
+       _dom_tim_is_counting( _psTHO ) )           //
+    if ( _dom_tim_expired( _psTHO ) )             //
+      _IsActive = false;
 
-  return isActive;
+  return _IsActive;
 }
 
 // --- end of file ----------------------------------------------------------------
