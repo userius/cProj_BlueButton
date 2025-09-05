@@ -1,3 +1,59 @@
+
+/**  Modbus Mapping for Digital Input/Mixer/Output Module
+|==============================================================================================|
+| Data Model         | Function Codes  | Address Range   | Access | Description / Mapping      |
+|==============================================================================================|
+| Coils              | FC01 (Read),    | `00000 – 00003` | R      | `phDOM->OutStates`         |
+|                    | FC05 (Write),   |                 |        | `phDOM->sProtCtrl`         |
+|                    | FC15 (Wr.Mult.) | `00000 – 00003` | W      | `.Activate/Deactivate`     |
+|                    |                 | `00020 – 00023` | R/W    | `.KeepActive`              |
+|                    |                 | `00040 – 00043` | R/W    | `.KeepInactive`            |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| Discrete Inputs    | FC02 (Read)     | `10000 – 10015` | R      | `phDIM->sOutsDIM.States`   |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| Input Registers    | FC04 (Read)     | `30001`         | R      | `phDIM->sOutsDIM.States`   |
+|                    |                 | `30002`         | R      | `phMIX->sOutsMIX.States`   |
+|                    |                 | `30003`         | R      | `phDOM->OutStates`         |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| Holding Registers  | FC03 (Read),    | `40000 - 40003` | R/W    | `phDOM->sProtCtrl`         |
+|                    | FC06 (Write),   | `40000`         | R/W    | `.KeepInactive`            |
+|                    | FC16 (Wr.Mult.) | `40001`         | R/W    | `.KeepActive`              |
+|                    |                 | `40002`         | R/W    | `.Deactivate`              |
+|                    |                 | `40003`         | R/W    | `.Activate`                |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| DIM Block          | FC03/FC06/FC16  | `40101 – 40104` | R/W    | `phDIM->aTau[0..3]`        |
+|                    |                 | `40117`         | R/W    | `phDIM->MaskForLED`        |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| MIX Block          |                 |                 |        | `phMIX->psCfg`             |
+| MIX Channel 0      | FC03/FC06/FC16  | `40200 – 40210` | R/W    | `->asChCfgs[ 0 ]`          |
+|                    |                 | `40200`         | R/W    | `.sMasksDIM.StXOR`         |
+|                    |                 | `40201`         | R/W    | `.sMasksDIM.State`         |
+|                    |                 | `40202`         | R/W    | `.sMasksDIM.Rise`          |
+|                    |                 | `40203`         | R/W    | `.sMasksDIM.Fall`          |
+|                    |                 | `40204`         | R/W    | `.sMasksMIX.StXOR`         |
+|                    |                 | `40205`         | R/W    | `.sMasksMIX.State`         |
+|                    |                 | `40206`         | R/W    | `.sMasksMIX.Rise`          |
+|                    |                 | `40207`         | R/W    | `.sMasksMIX.Fall`          |
+|                    |                 | `40208`         | R/W    | `.MaskUsage & 0x0000FFFFF` |
+|                    |                 | `40209`         | R/W    | `.MaskUsage >> 16`         |
+|                    |                 | `40210`         | R/W    | `.LogicOperation`          |
+| MIX Channel 1      | FC03/FC06/FC16  | `40220 – 40230` | R/W    | `same layout as Channel 0` |
+| MIX Channel 3      | FC03/FC06/FC16  | `40240 – 40250` | R/W    | `same layout as Channel 0` |
+| MIX Channel 3      | FC03/FC06/FC16  | `40260 – 40270` | R/W    | `same layout as Channel 0` |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| DOM Block          |                 |                 |        | `phDOM->psCfg`             |
+| DOM Channel 0      | FC03/FC06/FC16  | `40500 – 40503` | R/W    | `->asChCfg[ 3 ]`           |
+|                    |                 | `40500`         | R/W    | `.uAct.RegSrcID`           |
+|                    |                 | `40501`         | R/W    | `.uDeact.RegSrcID`         |
+|                    |                 | `40502`         | R/W    | `.uCfgTDA.RegTimCgf`       |
+|                    |                 | `40503`         | R/W    | `.uCfgTHO.RegTimCgf`       |
+| DOM Channel 1      | FC03/FC06/FC16  | `40504 – 40507` | R/W    | `same layout as Channel 0` |
+| DOM Channel 3      | FC03/FC06/FC16  | `40508 – 40511` | R/W    | `same layout as Channel 0` |
+| DOM Channel 3      | FC03/FC06/FC16  | `40512 – 40515` | R/W    | `same layout as Channel 0` |
+|                    |                 | `40516`         | R/W    | `->OutsMaskXOR[0..3]`      |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+ */
+
 #include "main.h"
 #include "microtbx.h"
 #include "microtbxmodbus.h"
@@ -413,57 +469,3 @@ static FnRes_t _FC06_WriteHoldingReg( tTbxMbServer ph, uint16_t Addr, uint16_t V
 
   return _Res;
 }
-
-/**  Modbus Mapping for Digital Input/Mixer/Output Module
-|==============================================================================================|
-| Data Model         | Function Codes  | Address Range   | Access | Description / Mapping      |
-|==============================================================================================|
-| Coils              | FC01 (Read),    |                 |        | `phDOM->sProtCtrl`         |
-|                    | FC05 (Write),   | `00000 – 00003` | R/W    | `.Activate/Deactivate`     |
-|                    | FC15 (Wr.Mult.) | `00020 – 00023` | R/W    | `.KeepActive`              |
-|                    |                 | `00040 – 00043` | R/W    | `.KeepInactive`            |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| Discrete Inputs    | FC02 (Read)     | `10000 – 10015` | R      | `phDIM->sOutsDIM.States`   |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| Input Registers    | FC04 (Read)     | `30001`         | R      | `phDIM->sOutsDIM.States`   |
-|                    |                 | `30002`         | R      | `phMIX->sOutsMIX.States`   |
-|                    |                 | `30003`         | R      | `phDOM->OutStates`         |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| Holding Registers  | FC03 (Read),    | `40000 - 40003` | R/W    | `phDOM->sProtCtrl`         |
-|                    | FC06 (Write),   | `40000`         | R/W    | `.KeepInactive`            |
-|                    | FC16 (Wr.Mult.) | `40001`         | R/W    | `.KeepActive`              |
-|                    |                 | `40002`         | R/W    | `.Deactivate`              |
-|                    |                 | `40003`         | R/W    | `.Activate`                |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| DIM Block          | FC03/FC06/FC16  | `40101 – 40104` | R/W    | `phDIM->aTau[0..3]`        |
-|                    |                 | `40117`         | R/W    | `phDIM->MaskForLED`        |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| MIX Block          |                 |                 |        | `phMIX->psCfg`             |
-| MIX Channel 0      | FC03/FC06/FC16  | `40200 – 40210` | R/W    | `->asChCfgs[ 0 ]`          |
-|                    |                 | `40200`         | R/W    | `.sMasksDIM.StXOR`         |
-|                    |                 | `40201`         | R/W    | `.sMasksDIM.State`         |
-|                    |                 | `40202`         | R/W    | `.sMasksDIM.Rise`          |
-|                    |                 | `40203`         | R/W    | `.sMasksDIM.Fall`          |
-|                    |                 | `40204`         | R/W    | `.sMasksMIX.StXOR`         |
-|                    |                 | `40205`         | R/W    | `.sMasksMIX.State`         |
-|                    |                 | `40206`         | R/W    | `.sMasksMIX.Rise`          |
-|                    |                 | `40207`         | R/W    | `.sMasksMIX.Fall`          |
-|                    |                 | `40208`         | R/W    | `.MaskUsage & 0x0000FFFFF` |
-|                    |                 | `40209`         | R/W    | `.MaskUsage >> 16`         |
-|                    |                 | `40210`         | R/W    | `.LogicOperation`          |
-| MIX Channel 1      | FC03/FC06/FC16  | `40220 – 40230` | R/W    | `same layout as Channel 0` |
-| MIX Channel 3      | FC03/FC06/FC16  | `40240 – 40250` | R/W    | `same layout as Channel 0` |
-| MIX Channel 3      | FC03/FC06/FC16  | `40260 – 40270` | R/W    | `same layout as Channel 0` |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| DOM Block          |                 |                 |        | `phDOM->psCfg`             |
-| DOM Channel 0      | FC03/FC06/FC16  | `40500 – 40503` | R/W    | `->asChCfg[ 3 ]`           |
-|                    |                 | `40500`         | R/W    | `.uAct.RegSrcID`           |
-|                    |                 | `40501`         | R/W    | `.uDeact.RegSrcID`         |
-|                    |                 | `40502`         | R/W    | `.uCfgTDA.RegTimCgf`       |
-|                    |                 | `40503`         | R/W    | `.uCfgTHO.RegTimCgf`       |
-| DOM Channel 1      | FC03/FC06/FC16  | `40504 – 40507` | R/W    | `same layout as Channel 0` |
-| DOM Channel 3      | FC03/FC06/FC16  | `40508 – 40511` | R/W    | `same layout as Channel 0` |
-| DOM Channel 3      | FC03/FC06/FC16  | `40512 – 40515` | R/W    | `same layout as Channel 0` |
-|                    |                 | `40516`         | R/W    | `->OutsMaskXOR[0..3]`      |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
- */
