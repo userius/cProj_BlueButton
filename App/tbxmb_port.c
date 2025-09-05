@@ -196,13 +196,13 @@ void TbxMbPortUartInit( tTbxMbUartPort port, tTbxMbUartBaudrate baudrate,
 
     HAL_UART_RegisterCallback( phUart, HAL_UART_MSPINIT_CB_ID, TbxMb_HAL_UART_MspInit );
     HAL_UART_RegisterCallback( phUart, HAL_UART_MSPDEINIT_CB_ID, TbxMb_HAL_UART_MspDeInit );
-    HAL_UART_RegisterCallback( phUart, HAL_UART_TX_COMPLETE_CB_ID, TbxMb_HAL_UART_TxCpltCallback );
-    HAL_UART_RegisterCallback( phUart, HAL_UART_RX_COMPLETE_CB_ID, TbxMb_HAL_UART_RxCpltCallback );
-    HAL_UART_RegisterCallback( phUart, HAL_UART_ERROR_CB_ID, TbxMb_HAL_UART_ErrorCallback );
   } while ( 0 );
 
   /* Initialize the channel. */
   HAL_UART_Init( phUart );
+  HAL_UART_RegisterCallback( phUart, HAL_UART_TX_COMPLETE_CB_ID, TbxMb_HAL_UART_TxCpltCallback );
+  HAL_UART_RegisterCallback( phUart, HAL_UART_RX_COMPLETE_CB_ID, TbxMb_HAL_UART_RxCpltCallback );
+  HAL_UART_RegisterCallback( phUart, HAL_UART_ERROR_CB_ID, TbxMb_HAL_UART_ErrorCallback );
   /* Kick off first byte reception. */
   HAL_UART_Receive_IT( phUart, &psPort->RxByte, 1 );
 

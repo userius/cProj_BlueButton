@@ -54,7 +54,7 @@ extern "C"
    * @brief Timer config for Digital Output Module
    */
   typedef union _dom_tim_cgf {
-    uint16_t RegCgf;
+    uint16_t RegTimCgf;
     struct {
       uint16_t Ticks : 15;     // Time in ticks
       uint16_t Mode : 1;       // see @defgroup Timer restart behavior
@@ -86,10 +86,20 @@ extern "C"
   /**
    * @brief Runtime state for a single channel
    */
-  typedef struct _channel_state {
+  typedef struct _dom_channel_state {
     sDOM_TimSt_t sTDA;     ///< TDA countdown
     sDOM_TimSt_t sTHO;     ///< THO countdown
   } sDOM_ChSt_t, *psDOM_ChSt_t;
+
+  /**
+   * @brief Protocol control signals for Digital Output Module
+   */
+  typedef struct _dom_protocol_control {
+    uint16_t KeepInactive;     // hDOM.OutStates forced to 0, overrides KeepActive
+    uint16_t KeepActive;       // hDOM.OutStates forced to 1
+    uint16_t Deactivate;       // Deactivate by protocol command
+    uint16_t Activate;         // Activate by protocol command
+  } sDOM_ProtCtrl_t, *psDOM_ProtCtrl_t;
 
   /**
    * @brief Digital Output Module runtime handle
@@ -108,13 +118,14 @@ extern "C"
    * - `QnttOuts`  → total number of configured outputs (max 16).
    */
   typedef struct {
-    psDOM_Cfg_t psCfg;                   ///< Pointer to configuration structure
-    sDOM_ChSt_t aChState[ DO_QNTT ];     ///< Array of per-channel state
-    psPin_t     asPinDO;                 ///< Array of output pin configurations
-    psMOS_t     psOutsDIM;               ///< Digital Input Module outputs
-    psMOS_t     psOutsMIX;               ///< Mixer Module outputs
-    uint16_t    OutStates;               ///< Current output states (bitfield)
-    uint8_t     QnttOuts;                ///< Total number of digital outputs (max 16)
+    psDOM_Cfg_t     psCfg;                   ///< Pointer to configuration structure
+    sDOM_ChSt_t     aChState[ DO_QNTT ];     ///< Array of per-channel state
+    psPin_t         asPinDO;                 ///< Array of output pin configurations
+    psMOS_t         psOutsDIM;               ///< Digital Input Module outputs
+    psMOS_t         psOutsMIX;               ///< Mixer Module outputs
+    sDOM_ProtCtrl_t sProtCtrl;               ///< Protocol control signals
+    uint16_t        OutStates;               ///< Current output states (bitfield)
+    uint8_t         QnttOuts;                ///< Total number of digital outputs (max 16)
   } hDOM_t, *phDOM_t;
 
   void DOM_Init( void );

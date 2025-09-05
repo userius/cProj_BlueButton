@@ -74,32 +74,32 @@ static sPin_t asPins[ DO_QNTT ] = {
  * and deactivated on falling edge of corresponding digital input (0..3).
  * TDA=0 (immediate), THO=50 cycles (~500ms if DOM_Update called every 10ms).
  */
-sDOM_Cfg_t sCfg = {
+static sDOM_Cfg_t sCfg = {
     .OutsMaskXOR = 0x000F,     // clang-format off
     .asChCfg     = {    
         {   // Channel 0
             .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 0 },
             .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 0 },
-            .uCfgTDA       = { .Ticks = 1,  .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 50, .Mode = DOM_TIM_MODE_IGNORE  },
+            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
+            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
         },
         {   // Channel 1
             .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 1 },
             .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 1 },
-            .uCfgTDA       = { .Ticks = 1,  .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 50, .Mode = DOM_TIM_MODE_IGNORE  },
+            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
+            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
         },
         {   // Channel 2
             .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 2 },
             .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 2 },
-            .uCfgTDA       = { .Ticks = 1,  .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 50, .Mode = DOM_TIM_MODE_IGNORE  },
+            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
+            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
         },
         {   // Channel 3
             .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 3 },
             .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 3 },
-            .uCfgTDA       = { .Ticks = 1,  .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 50, .Mode = DOM_TIM_MODE_IGNORE  },
+            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
+            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
         }     
     },
 };     // clang-format on
@@ -160,6 +160,8 @@ void DOM_Update( hDOM_t *ph ) {
    *  Loop through all configured output channels
    *    Get input signals for the channel
    *    Process channel logic
+   *  Clear protocol control signals after processing: Activate, Deactivate
+   *  Apply protocol control signals: KeepActive, KeepInactive
    *  Update outputs
    *  Apply to GPIO pins
    */
@@ -171,6 +173,9 @@ void DOM_Update( hDOM_t *ph ) {
     if ( _dom_process_channel( ph, _Ch, _Act, _Dea ) )     //
       _NewOuts |= ( 1U << _Ch );
   }
+  ph->sProtCtrl.Activate = ph->sProtCtrl.Deactivate = 0;
+  SET_BIT( _NewOuts, ph->sProtCtrl.KeepActive );
+  CLEAR_BIT( _NewOuts, ph->sProtCtrl.KeepInactive );
   ph->OutStates = _NewOuts;
   _dom_all_pins_update( ph );
 
@@ -237,21 +242,32 @@ static void _dom_all_pins_update( phDOM_t ph ) {
  *
  * @return  true if the specified signal is active, false otherwise.
  */
-__STATIC_INLINE bool _dom_get_signal( phDOM_t ph, uint8_t Ch, eDOM_InSig_t InSigType ) {
+__STATIC_INLINE bool _dom_get_signal( phDOM_t ph, uint8_t Ch, eDOM_InSig_t eInSigType ) {
   //
-  puDOM_SigID_t puSig = DOM_IN_SIG_ACTIVATION == InSigType ? &ph->psCfg->asChCfg[ Ch ].uAct :
-                                                             &ph->psCfg->asChCfg[ Ch ].uDeact;
-  psMOS_t       psOut = DOM_SRC_DI == puSig->SourceID  ? ph->psOutsDIM :
-                        DOM_SRC_MIX == puSig->SourceID ? ph->psOutsMIX :
-                                                         NULL;
-  if ( !psOut ) return false;
+  puDOM_SigID_t _puSig = ( DOM_IN_SIG_ACTIVATION == eInSigType ) ?     //
+                             &ph->psCfg->asChCfg[ Ch ].uAct :
+                             &ph->psCfg->asChCfg[ Ch ].uDeact;
+  psMOS_t       _psOut = ( DOM_SRC_DI == _puSig->SourceID )  ? ph->psOutsDIM :
+                         ( DOM_SRC_MIX == _puSig->SourceID ) ? ph->psOutsMIX :
+                                                               NULL;
+  uint16_t      _Sigs  = 0;
 
-  uint16_t _Sigs = DOM_SIG_GR_EDGE_RISE == puSig->GroupID ? psOut->EdgesRise :
-                   DOM_SIG_GR_EDGE_FALL == puSig->GroupID ? psOut->EdgesFall :
-                   DOM_SIG_GR_EDGE_ANY == puSig->GroupID  ? psOut->EdgesAny :
-                                                            psOut->States;
+  if ( _psOut )
+    _Sigs = ( DOM_SIG_GR_EDGE_RISE == _puSig->GroupID ) ? _psOut->EdgesRise :
+            ( DOM_SIG_GR_EDGE_FALL == _puSig->GroupID ) ? _psOut->EdgesFall :
+            ( DOM_SIG_GR_EDGE_ANY == _puSig->GroupID )  ? _psOut->EdgesAny :
+                                                          _psOut->States;
+  //
+  bool _Res = 0 != ( _Sigs & ( 1U << _puSig->ChanID ) );     //
 
-  return 0 != ( _Sigs & ( 1U << puSig->ChanID ) );
+  // Add protocol control signals if assigned to this channel.
+  if ( DOM_SRC_NONE != _puSig->SourceID )                             //
+    _Res |= 0U != READ_BIT( DOM_IN_SIG_ACTIVATION == eInSigType ?     //
+                                ph->sProtCtrl.Activate :
+                                ph->sProtCtrl.Deactivate,
+                            1U << Ch );
+
+  return _Res;
 }
 
 /** --------------------------------------------------------------------------
@@ -332,7 +348,7 @@ __STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
 
   /* Immediate deactivation path: cancels both timers and forces output low. */
   if ( Deactivate ) {
-    if ( _IsActive ) { _IsActive = false; }
+    _IsActive = false;
     _dom_tim_reset( _psTDA );
     _dom_tim_reset( _psTHO );
   }

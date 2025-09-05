@@ -55,9 +55,10 @@ int app_main( void ) {
 
   for ( ;; ) {
     AppTick_Serve( phAppTicks );
-    // EventStartA( 0 );
     KPB_Serve( phKPB );
-    // EventStartA( 0 ); EventStopA( 0 );
+		TbxMbEventTask( );
+    // EventStartA( 0 );
+    // EventStopA( 0 );
   }
 }
 
@@ -68,7 +69,7 @@ static void DIDO_Serve( void *pArgs ) {
   //
   UNUSED( pArgs );
   DIM_Update( phDIM );
-  // MIX_Update( phMIX );
+  MIX_Update( phMIX );
   DOM_Update( phDOM );
   return;
 }
