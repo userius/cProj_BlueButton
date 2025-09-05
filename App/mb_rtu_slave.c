@@ -236,10 +236,10 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
     case 40201U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.State; break;
     case 40202U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Rise; break;
     case 40203U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Fall; break;
-    case 40204U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.StXOR; break;
-    case 40205U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.State; break;
-    case 40206U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Rise; break;
-    case 40207U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Fall; break;
+    case 40204U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.StXOR; break;
+    case 40205U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.State; break;
+    case 40206U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Rise; break;
+    case 40207U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Fall; break;
     case 40208U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 0 ]; break;
     case 40209U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 1 ]; break;
     case 40210U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 0 ].eLogicOperation; break;
@@ -247,10 +247,10 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
     case 40221U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.State; break;
     case 40222U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Rise; break;
     case 40223U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Fall; break;
-    case 40224U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.StXOR; break;
-    case 40225U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.State; break;
-    case 40226U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Rise; break;
-    case 40227U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Fall; break;
+    case 40224U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.StXOR; break;
+    case 40225U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.State; break;
+    case 40226U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Rise; break;
+    case 40227U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Fall; break;
     case 40228U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 0 ]; break;
     case 40229U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 1 ]; break;
     case 40230U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 1 ].eLogicOperation; break;
@@ -258,10 +258,10 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
     case 40241U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.State; break;
     case 40242U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Rise; break;
     case 40243U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Fall; break;
-    case 40244U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.StXOR; break;
-    case 40245U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.State; break;
-    case 40246U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Rise; break;
-    case 40247U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Fall; break;
+    case 40244U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.StXOR; break;
+    case 40245U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.State; break;
+    case 40246U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Rise; break;
+    case 40247U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Fall; break;
     case 40248U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 0 ]; break;
     case 40249U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 1 ]; break;
     case 40250U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 2 ].eLogicOperation; break;
@@ -269,10 +269,10 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
     case 40261U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.State; break;
     case 40262U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Rise; break;
     case 40263U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Fall; break;
-    case 40264U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.StXOR; break;
-    case 40265U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.State; break;
-    case 40266U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Rise; break;
-    case 40267U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Fall; break;
+    case 40264U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.StXOR; break;
+    case 40265U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.State; break;
+    case 40266U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Rise; break;
+    case 40267U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Fall; break;
     case 40268U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 0 ]; break;
     case 40269U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 1 ]; break;
     case 40270U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 3 ].eLogicOperation; break;
@@ -293,7 +293,8 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
     case 40513U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uDeact.RegSrcID; break;
     case 40514U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uCfgTDA.RegTimCgf; break;
     case 40515U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uCfgTHO.RegTimCgf; break;
-    case 40516U: *pVal = phDOM->psCfg->OutsMaskXOR; break;
+    // DOM out pins mask
+    case 40564U: *pVal = phDOM->psCfg->OutsMaskXOR; break;
 
     default:     // Unsupported input register address.
       _Err = TBX_MB_SERVER_ERR_ILLEGAL_DATA_ADDR;
@@ -332,68 +333,79 @@ static FnRes_t _FC06_WriteHoldingReg( tTbxMbServer ph, uint16_t Addr, uint16_t V
     case 40103U: phDIM->psCfg->aTau[ Addr - 40100 ] = Val; break;
     case 40116U: phDIM->psCfg->MaskForLED = Val; break;
     // MIX config registers
+    // MIX channel 0
     case 40200U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.StXOR = Val; break;
     case 40201U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.State = Val; break;
     case 40202U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Rise = Val; break;
     case 40203U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Fall = Val; break;
-    case 40204U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.StXOR = Val; break;
-    case 40205U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.State = Val; break;
-    case 40206U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Rise = Val; break;
-    case 40207U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Fall = Val; break;
+    case 40204U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.StXOR = Val; break;
+    case 40205U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.State = Val; break;
+    case 40206U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Rise = Val; break;
+    case 40207U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Fall = Val; break;
     case 40208U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 0 ] = Val; break;
     case 40209U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 1 ] = Val; break;
     case 40210U: phMIX->psCfg->asChCfgs[ 0 ].eLogicOperation = Val; break;
+    // MIX channel 1
     case 40220U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.StXOR = Val; break;
     case 40221U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.State = Val; break;
     case 40222U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Rise = Val; break;
     case 40223U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Fall = Val; break;
-    case 40224U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.StXOR = Val; break;
-    case 40225U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.State = Val; break;
-    case 40226U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Rise = Val; break;
-    case 40227U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Fall = Val; break;
+    case 40224U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.StXOR = Val; break;
+    case 40225U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.State = Val; break;
+    case 40226U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Rise = Val; break;
+    case 40227U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Fall = Val; break;
     case 40228U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 0 ] = Val; break;
     case 40229U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 1 ] = Val; break;
     case 40230U: phMIX->psCfg->asChCfgs[ 1 ].eLogicOperation = Val; break;
+    // MIX channel 2
     case 40240U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.StXOR = Val; break;
     case 40241U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.State = Val; break;
     case 40242U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Rise = Val; break;
     case 40243U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Fall = Val; break;
-    case 40244U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.StXOR = Val; break;
-    case 40245U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.State = Val; break;
-    case 40246U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Rise = Val; break;
-    case 40247U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Fall = Val; break;
+    case 40244U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.StXOR = Val; break;
+    case 40245U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.State = Val; break;
+    case 40246U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Rise = Val; break;
+    case 40247U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Fall = Val; break;
     case 40248U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 0 ] = Val; break;
     case 40249U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 1 ] = Val; break;
     case 40250U: phMIX->psCfg->asChCfgs[ 2 ].eLogicOperation = Val; break;
+    // MIX channel 3
     case 40260U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.StXOR = Val; break;
     case 40261U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.State = Val; break;
     case 40262U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Rise = Val; break;
     case 40263U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Fall = Val; break;
-    case 40264U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.StXOR = Val; break;
-    case 40265U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.State = Val; break;
-    case 40266U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Rise = Val; break;
-    case 40267U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Fall = Val; break;
+    case 40264U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.StXOR = Val; break;
+    case 40265U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.State = Val; break;
+    case 40266U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Rise = Val; break;
+    case 40267U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Fall = Val; break;
     case 40268U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 0 ] = Val; break;
     case 40269U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 1 ] = Val; break;
     case 40270U: phMIX->psCfg->asChCfgs[ 3 ].eLogicOperation = Val; break;
     // DOM config registers
+    // DOM channel 0
     case 40500U: phDOM->psCfg->asChCfg[ 0 ].uAct.RegSrcID = Val; break;
     case 40501U: phDOM->psCfg->asChCfg[ 0 ].uDeact.RegSrcID = Val; break;
     case 40502U: phDOM->psCfg->asChCfg[ 0 ].uCfgTDA.RegTimCgf = Val; break;
     case 40503U: phDOM->psCfg->asChCfg[ 0 ].uCfgTHO.RegTimCgf = Val; break;
+    // case 40503U: phDOM->psCfg->asChCfg[ (Addr - 40500) / 4 ].uCfgTHO.RegTimCgf = Val; break;
+    // DOM channel 1
     case 40504U: phDOM->psCfg->asChCfg[ 1 ].uAct.RegSrcID = Val; break;
     case 40505U: phDOM->psCfg->asChCfg[ 1 ].uDeact.RegSrcID = Val; break;
     case 40506U: phDOM->psCfg->asChCfg[ 1 ].uCfgTDA.RegTimCgf = Val; break;
     case 40507U: phDOM->psCfg->asChCfg[ 1 ].uCfgTHO.RegTimCgf = Val; break;
+    // DOM channel 2
     case 40508U: phDOM->psCfg->asChCfg[ 2 ].uAct.RegSrcID = Val; break;
     case 40509U: phDOM->psCfg->asChCfg[ 2 ].uDeact.RegSrcID = Val; break;
     case 40510U: phDOM->psCfg->asChCfg[ 2 ].uCfgTDA.RegTimCgf = Val; break;
     case 40511U: phDOM->psCfg->asChCfg[ 2 ].uCfgTHO.RegTimCgf = Val; break;
+    // DOM channel 3
     case 40512U: phDOM->psCfg->asChCfg[ 3 ].uAct.RegSrcID = Val; break;
     case 40513U: phDOM->psCfg->asChCfg[ 3 ].uDeact.RegSrcID = Val; break;
     case 40514U: phDOM->psCfg->asChCfg[ 3 ].uCfgTDA.RegTimCgf = Val; break;
     case 40515U: phDOM->psCfg->asChCfg[ 3 ].uCfgTHO.RegTimCgf = Val; break;
-    case 40516U: phDOM->psCfg->OutsMaskXOR = Val; break;
+    // DOM out pins mask
+    case 40564U: phDOM->psCfg->OutsMaskXOR = Val; break;
+
     default:     // Unsupported holding register address.
       _Res = TBX_MB_SERVER_ERR_ILLEGAL_DATA_ADDR;
       break;
@@ -402,32 +414,56 @@ static FnRes_t _FC06_WriteHoldingReg( tTbxMbServer ph, uint16_t Addr, uint16_t V
   return _Res;
 }
 
-/**  Modbus Mapping for Digital Input/Output Module
-───────────────────────────────────────────────────────────────────────────────
- Function  | Address Range | Access | Description
-───────────┼───────────────┼────────┼──────────────────────────────────────────
- FC01/05   | 00000..00003  | R/W    | Digital outputs (coils)
-           |               |        | Read: phDOM->OutStates
-           |               |        | Write: Activate/Deactivate
-           |               |        | bits 0..3
-───────────┼───────────────┼────────┼──────────────────────────────────────────
- FC05 only | 00020..00023  | W      | KeepActive control bits
-           |               |        | (phDOM->sProtCtrl.KeepActive)
-───────────┼───────────────┼────────┼──────────────────────────────────────────
- FC05 only | 00040..00043  | W      | KeepInactive control bits
-           |               |        | (phDOM->sProtCtrl.KeepInactive)
-───────────┼───────────────┼────────┼──────────────────────────────────────────
- FC02      | 10000..10015  | R      | Digital inputs:
-           |               |        | phDIM->sOutsDIM.States
-           |               |        | bits 0..15
-───────────┼───────────────┼────────┼──────────────────────────────────────────
- FC04      | 30000         | R      | Input reg: phDIM->sOutsDIM.States
-           | 30001         | R      | Input reg: phMIX->sOutsMIX.States
-           | 30002         | R      | Input reg: phDOM->OutStates
-───────────┼───────────────┼────────┼──────────────────────────────────────────
- FC03/06   | 40000         | R/W    | Holding reg: phDOM->sProtCtrl.KeepInactive
-           | 40001         | R/W    | Holding reg: phDOM->sProtCtrl.KeepActive
-           | 40002         | R/W    | Holding reg: phDOM->sProtCtrl.Deactivate
-           | 40003         | R/W    | Holding reg: phDOM->sProtCtrl.Activate
-───────────────────────────────────────────────────────────────────────────────
+/**  Modbus Mapping for Digital Input/Mixer/Output Module
+|==============================================================================================|
+| Data Model         | Function Codes  | Address Range   | Access | Description / Mapping      |
+|==============================================================================================|
+| Coils              | FC01 (Read),    |                 |        | `phDOM->sProtCtrl`         |
+|                    | FC05 (Write),   | `00000 – 00003` | R/W    | `.Activate/Deactivate`     |
+|                    | FC15 (Wr.Mult.) | `00020 – 00023` | R/W    | `.KeepActive`              |
+|                    |                 | `00040 – 00043` | R/W    | `.KeepInactive`            |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| Discrete Inputs    | FC02 (Read)     | `10000 – 10015` | R      | `phDIM->sOutsDIM.States`   |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| Input Registers    | FC04 (Read)     | `30001`         | R      | `phDIM->sOutsDIM.States`   |
+|                    |                 | `30002`         | R      | `phMIX->sOutsMIX.States`   |
+|                    |                 | `30003`         | R      | `phDOM->OutStates`         |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| Holding Registers  | FC03 (Read),    | `40000 - 40003` | R/W    | `phDOM->sProtCtrl`         |
+|                    | FC06 (Write),   | `40000`         | R/W    | `.KeepInactive`            |
+|                    | FC16 (Wr.Mult.) | `40001`         | R/W    | `.KeepActive`              |
+|                    |                 | `40002`         | R/W    | `.Deactivate`              |
+|                    |                 | `40003`         | R/W    | `.Activate`                |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| DIM Block          | FC03/FC06/FC16  | `40101 – 40104` | R/W    | `phDIM->aTau[0..3]`        |
+|                    |                 | `40117`         | R/W    | `phDIM->MaskForLED`        |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| MIX Block          |                 |                 |        | `phMIX->psCfg`             |
+| MIX Channel 0      | FC03/FC06/FC16  | `40200 – 40210` | R/W    | `->asChCfgs[ 0 ]`          |
+|                    |                 | `40200`         | R/W    | `.sMasksDIM.StXOR`         |
+|                    |                 | `40201`         | R/W    | `.sMasksDIM.State`         |
+|                    |                 | `40202`         | R/W    | `.sMasksDIM.Rise`          |
+|                    |                 | `40203`         | R/W    | `.sMasksDIM.Fall`          |
+|                    |                 | `40204`         | R/W    | `.sMasksMIX.StXOR`         |
+|                    |                 | `40205`         | R/W    | `.sMasksMIX.State`         |
+|                    |                 | `40206`         | R/W    | `.sMasksMIX.Rise`          |
+|                    |                 | `40207`         | R/W    | `.sMasksMIX.Fall`          |
+|                    |                 | `40208`         | R/W    | `.MaskUsage & 0x0000FFFFF` |
+|                    |                 | `40209`         | R/W    | `.MaskUsage >> 16`         |
+|                    |                 | `40210`         | R/W    | `.LogicOperation`          |
+| MIX Channel 1      | FC03/FC06/FC16  | `40220 – 40230` | R/W    | `same layout as Channel 0` |
+| MIX Channel 3      | FC03/FC06/FC16  | `40240 – 40250` | R/W    | `same layout as Channel 0` |
+| MIX Channel 3      | FC03/FC06/FC16  | `40260 – 40270` | R/W    | `same layout as Channel 0` |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+| DOM Block          |                 |                 |        | `phDOM->psCfg`             |
+| DOM Channel 0      | FC03/FC06/FC16  | `40500 – 40503` | R/W    | `->asChCfg[ 3 ]`           |
+|                    |                 | `40500`         | R/W    | `.uAct.RegSrcID`           |
+|                    |                 | `40501`         | R/W    | `.uDeact.RegSrcID`         |
+|                    |                 | `40502`         | R/W    | `.uCfgTDA.RegTimCgf`       |
+|                    |                 | `40503`         | R/W    | `.uCfgTHO.RegTimCgf`       |
+| DOM Channel 1      | FC03/FC06/FC16  | `40504 – 40507` | R/W    | `same layout as Channel 0` |
+| DOM Channel 3      | FC03/FC06/FC16  | `40508 – 40511` | R/W    | `same layout as Channel 0` |
+| DOM Channel 3      | FC03/FC06/FC16  | `40512 – 40515` | R/W    | `same layout as Channel 0` |
+|                    |                 | `40516`         | R/W    | `->OutsMaskXOR[0..3]`      |
+| ------------------ | --------------- | --------------- | ------ | -------------------------- |
  */
