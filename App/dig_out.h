@@ -9,7 +9,7 @@ extern "C"
 #include <stdbool.h>
 #include "dig_com.h"
 
-#define DO_QNTT ( 4U )     // Number of digital outputs, max 16
+#define DO_QNTT ( 16U )     // Number of digital outputs, max 16
 
 /**
  * @defgroup Timer restart behavior

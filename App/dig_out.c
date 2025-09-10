@@ -42,6 +42,8 @@
 /** Static function prototypes ***********************************************/
 static void          _dom_all_pins_init( phDOM_t ph );
 static void          _dom_all_pins_update( phDOM_t ph );
+static void          _dom_set_pins_cfg( void );
+static void          _dom_set_cfg( void );
 __STATIC_INLINE bool _dom_tim_expired( psDOM_TimSt_t ps );
 __STATIC_INLINE void _dom_tim_start( psDOM_TimSt_t ps, puDOM_TimCfg_t puCfg );
 __STATIC_INLINE void _dom_tim_reset( psDOM_TimSt_t ps );
@@ -60,49 +62,18 @@ __STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
  * allows up to 16 outputs, but only the first DO_QNTT entries are used.
  *
  * Modify this array to match your specific hardware connections.
+ * Fill it in _dom_set_pins_cfg() function.
  */
-static sPin_t asPins[ DO_QNTT ] = {
-    { .psPort = GPIOA, .Pin = LL_GPIO_PIN_9 },     //
-    { .psPort = GPIOC, .Pin = LL_GPIO_PIN_7 },     //
-    { .psPort = GPIOB, .Pin = LL_GPIO_PIN_6 },     //
-    { .psPort = GPIOA, .Pin = LL_GPIO_PIN_7 },     //
-};
+static sPin_t asPins[ DO_QNTT ];
 
 /** ---------------------------------------------------------------------------
  * @brief   Default configuration for the Digital Output Module (DOM).
  * no inversion, each channel activated on rising edge
  * and deactivated on falling edge of corresponding digital input (0..3).
  * TDA=0 (immediate), THO=50 cycles (~500ms if DOM_Update called every 10ms).
+ * Fill it in _dom_set_cfg() function.
  */
-static sDOM_Cfg_t sCfg = {
-    .OutsMaskXOR = 0x000F,     // clang-format off
-    .asChCfg     = {    
-        {   // Channel 0
-            .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 0 },
-            .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 0 },
-            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
-        },
-        {   // Channel 1
-            .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 1 },
-            .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 1 },
-            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
-        },
-        {   // Channel 2
-            .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 2 },
-            .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 2 },
-            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
-        },
-        {   // Channel 3
-            .uAct   = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_RISE, .ChanID = 3 },
-            .uDeact = { .SourceID = DOM_SRC_DI, .GroupID = DOM_SIG_GR_EDGE_FALL, .ChanID = 3 },
-            .uCfgTDA       = { .Ticks = 1,   .Mode = DOM_TIM_MODE_RESTART },
-            .uCfgTHO       = { .Ticks = 150, .Mode = DOM_TIM_MODE_IGNORE  },
-        }     
-    },
-};     // clang-format on
+static sDOM_Cfg_t sCfg;
 
 hDOM_t  hDOM;
 hDOM_t *phDOM = NULL;
@@ -120,17 +91,20 @@ hDOM_t *phDOM = NULL;
  */
 void DOM_Init( void ) {
   //
-  hDOM.psCfg = &sCfg;
-  for ( size_t i = 0; i < DO_QNTT; i++ ) hDOM.aChState[ i ] = ( sDOM_ChSt_t ){ 0, 0 };
-  hDOM.asPinDO   = asPins;
-  hDOM.psOutsDIM = &phDIM->sOutsDIM;
-  hDOM.psOutsMIX = &phMIX->sOutsMIX;
-  hDOM.OutStates = 0;
-  hDOM.QnttOuts  = DO_QNTT;
+  _dom_set_cfg( );                           // set default configuration in sCfg
+  hDOM.psCfg = &sCfg;                        // link configuration structure
+  for ( size_t i = 0; i < DO_QNTT; i++ )     // clear channel states
+    hDOM.aChState[ i ] = ( sDOM_ChSt_t ){ 0, 0 };
+  _dom_set_pins_cfg( );                  // configure pin array asPins[]
+  hDOM.asPinDO   = asPins;               // link pin array
+  hDOM.psOutsDIM = &phDIM->sOutsDIM;     // link to DIM outputs
+  hDOM.psOutsMIX = &phMIX->sOutsMIX;     // link to MIX outputs
+  hDOM.OutStates = 0;                    // all outputs off
+  hDOM.QnttOuts  = DO_QNTT;              // total number of outputs
 
-  phDOM = &hDOM;
-  _dom_all_pins_init( phDOM );
-  _dom_all_pins_update( phDOM );
+  phDOM = &hDOM;                     // make global pointer
+  _dom_all_pins_init( phDOM );       // init all pins as outputs, low state
+  _dom_all_pins_update( phDOM );     // apply initial states to pins
 
   return;
 }
@@ -177,12 +151,78 @@ void DOM_Update( hDOM_t *ph ) {
   SET_BIT( _NewOuts, ph->sProtCtrl.KeepActive );
   CLEAR_BIT( _NewOuts, ph->sProtCtrl.KeepInactive );
   ph->OutStates = _NewOuts;
+
   _dom_all_pins_update( ph );
 
   return;
 }
 
 /** Static functions *********************************************************/
+
+/** ---------------------------------------------------------------------------
+ * @brief  Set default DOM configuration in sCfg structure.
+ */
+static void _dom_set_cfg( void ) {
+  //
+  sCfg.OutsMaskXOR = 0x000F;     // Invert first 4 outputs
+  for ( size_t i = 0; i < DO_QNTT; i++ ) {
+    puDOM_SigID_t  _puA   = &sCfg.asChCfg[ i ].uAct;
+    puDOM_SigID_t  _puD   = &sCfg.asChCfg[ i ].uDeact;
+    puDOM_TimCfg_t _puTDA = &sCfg.asChCfg[ i ].uCfgTDA;
+    puDOM_TimCfg_t _puTHO = &sCfg.asChCfg[ i ].uCfgTHO;
+    switch ( i ) {
+      case 0:
+      case 1:
+      case 2:
+      case 3: {
+        _puA->SourceID = DOM_SRC_DI;
+        _puA->GroupID  = DOM_SIG_GR_EDGE_RISE;
+        _puA->ChanID   = i;
+        _puD->SourceID = DOM_SRC_DI;
+        _puD->GroupID  = DOM_SIG_GR_EDGE_FALL;
+        _puD->ChanID   = i;
+        _puTDA->Ticks  = 1;     // 1 tick ~ 10ms if called @100Hz
+        _puTDA->Mode   = DOM_TIM_MODE_RESTART;
+        _puTHO->Ticks  = 150;     // 150 ticks ~ 1.5s if called @100Hz
+        _puTHO->Mode   = DOM_TIM_MODE_RESTART;
+        break;
+      }
+      default: {
+        _puA->SourceID = DOM_SRC_NONE;
+        _puA->GroupID  = DOM_SIG_GR_EDGE_ANY;
+        _puA->ChanID   = i;
+        _puD->SourceID = DOM_SRC_NONE;
+        _puD->GroupID  = DOM_SIG_GR_EDGE_ANY;
+        _puD->ChanID   = i;
+        _puTDA->Ticks  = 10;     // 10 tick ~ 100ms if called @100Hz
+        _puTDA->Mode   = DOM_TIM_MODE_RESTART;
+        _puTHO->Ticks  = 100;     // 100 ticks ~ 1.0s if called @100Hz
+        _puTHO->Mode   = DOM_TIM_MODE_RESTART;
+        break;
+      }
+    }
+  }
+  return;
+}
+
+/** --------------------------------------------------------------------------
+ * @brief   Set pin configurations in the pin array.
+ */
+static void _dom_set_pins_cfg( void ) {
+  //
+  for ( size_t i = 0; i < DI_QNTT; i++ ) {
+    psPin_t _ps = &asPins[ i ];
+    switch ( i ) {     // clang-format off
+      case 0:  _ps->psPort = GPIOA; _ps->Pin = LL_GPIO_PIN_9;   break;     // PA9
+      case 1:  _ps->psPort = GPIOC; _ps->Pin = LL_GPIO_PIN_7;   break;     // PC7
+      case 2:  _ps->psPort = GPIOB; _ps->Pin = LL_GPIO_PIN_6;   break;     // PB6
+      case 3:  _ps->psPort = GPIOA; _ps->Pin = LL_GPIO_PIN_7;   break;     // PA7
+      default: _ps->psPort = NULL;  _ps->Pin = LL_GPIO_PIN_ALL; break;
+    }     // clang-format on
+  }
+  return;
+}
+
 /** --------------------------------------------------------------------------
  * @brief   Initialize all digital output pins.
  * @param   ph  Pointer to the digital output module handler structure
@@ -196,18 +236,20 @@ static void _dom_all_pins_init( phDOM_t ph ) {
    */
   for ( uint8_t id = 0; id < ph->QnttOuts; id++ ) {
     GPIO_TypeDef *_psPort = ph->asPinDO[ id ].psPort;
-    uint32_t      _Pin    = ph->asPinDO[ id ].Pin;
-    switch ( (uint32_t) _psPort ) {
-      case ( (uint32_t) GPIOA ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOA ); break;
-      case ( (uint32_t) GPIOB ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOB ); break;
-      case ( (uint32_t) GPIOC ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOC ); break;
-      case ( (uint32_t) GPIOD ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOD ); break;
-      default: continue;
+    if ( _psPort ) {
+      uint32_t _Pin = ph->asPinDO[ id ].Pin;
+      switch ( (uint32_t) _psPort ) {
+        case ( (uint32_t) GPIOA ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOA ); break;
+        case ( (uint32_t) GPIOB ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOB ); break;
+        case ( (uint32_t) GPIOC ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOC ); break;
+        case ( (uint32_t) GPIOD ): LL_APB2_GRP1_EnableClock( LL_APB2_GRP1_PERIPH_GPIOD ); break;
+        default: continue;
+      }
+      LL_GPIO_ResetOutputPin( _psPort, _Pin );
+      LL_GPIO_SetPinSpeed( _psPort, _Pin, LL_GPIO_SPEED_FREQ_LOW );
+      LL_GPIO_SetPinOutputType( _psPort, _Pin, LL_GPIO_OUTPUT_PUSHPULL );
+      LL_GPIO_SetPinMode( _psPort, _Pin, LL_GPIO_MODE_OUTPUT );
     }
-    LL_GPIO_ResetOutputPin( _psPort, _Pin );
-    LL_GPIO_SetPinSpeed( _psPort, _Pin, LL_GPIO_SPEED_FREQ_LOW );
-    LL_GPIO_SetPinOutputType( _psPort, _Pin, LL_GPIO_OUTPUT_PUSHPULL );
-    LL_GPIO_SetPinMode( _psPort, _Pin, LL_GPIO_MODE_OUTPUT );
   }
 
   return;
@@ -225,10 +267,12 @@ static void _dom_all_pins_update( phDOM_t ph ) {
   uint16_t _outs = ph->OutStates ^ ph->psCfg->OutsMaskXOR;
   for ( uint8_t id = 0; id < ph->QnttOuts; id++ ) {
     GPIO_TypeDef *_psPort = ph->asPinDO[ id ].psPort;
-    uint32_t      _Pin    = ph->asPinDO[ id ].Pin;
-    bool          _State  = 0 != ( _outs & ( 1U << id ) );
-    _State ? LL_GPIO_SetOutputPin( _psPort, _Pin ) :     //
-             LL_GPIO_ResetOutputPin( _psPort, _Pin );
+    if ( _psPort ) {
+      uint32_t _Pin   = ph->asPinDO[ id ].Pin;
+      bool     _State = 0 != ( _outs & ( 1U << id ) );
+      _State ? LL_GPIO_SetOutputPin( _psPort, _Pin ) :     //
+               LL_GPIO_ResetOutputPin( _psPort, _Pin );
+    }
   }
 
   return;
