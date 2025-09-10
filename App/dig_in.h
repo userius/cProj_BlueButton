@@ -9,9 +9,9 @@ extern "C"
 #include <stdbool.h>
 #include "dig_com.h"
 
-#define DI_QNTT            4       // Number of digital inputs, max 16
-#define DI_THRESHOLD_TRUE  160     // 160 ~ 2/3 of 256
-#define DI_THRESHOLD_FALSE 96      // 96 ~ 1/3 of 256
+#define DI_QNTT            16U      // Number of digital inputs, max 16
+#define DI_THRESHOLD_TRUE  160U     // 160 ~ 2/3 of 256
+#define DI_THRESHOLD_FALSE 96U      // 96 ~ 1/3 of 256
 
   typedef struct _dig_input {              // Digital input structure
     union {                                //

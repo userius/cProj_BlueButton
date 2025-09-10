@@ -14,20 +14,13 @@ static bool _signal_update( psDI_Sig_t ps, bool RawNew, uint8_t Tau );
 static void _init_all_di_pins( phDIM_t ph );
 static void _set_pin_to_input( psPin_t ps );
 static void _set_pin_to_output( psPin_t ps, bool PinState );
+static void _set_pins_cfg( void );
+static void _set_cfg( void );
 
-static sDIM_Cfg_t sCfg = {
-    .aTau       = { 50, 50, 50, 50 },     //
-    .MaskForLED = 0x000F,                 //
-};
+static sDIM_Cfg_t sCfg;
+static sDI_Sig_t  asSigs[ DI_QNTT ];
+static sPin_t     asPins[ DI_QNTT ];
 
-sDI_Sig_t asSigs[ DI_QNTT ];
-
-static sPin_t asPins[ DI_QNTT ] = {
-    { .psPort = GPIOB, .Pin = LL_GPIO_PIN_5 },      //
-    { .psPort = GPIOB, .Pin = LL_GPIO_PIN_4 },      //
-    { .psPort = GPIOB, .Pin = LL_GPIO_PIN_10 },     //
-    { .psPort = GPIOA, .Pin = LL_GPIO_PIN_8 },      //
-};
 hDIM_t hDIM = {
     .psCfg     = &sCfg,
     .asSig     = asSigs,
@@ -43,7 +36,10 @@ phDIM_t phDIM = &hDIM;
  */
 void DIM_Init( void ) {
   //
+  _set_cfg( );
+  _set_pins_cfg( );
   _init_all_di_pins( phDIM );
+
   return;
 }
 
@@ -72,6 +68,8 @@ void DIM_Update( void *pArgs ) {
   //
   phDIM_t ph = (phDIM_t) pArgs;
 
+  if ( !ph ) return;
+
   // --- Step 1: Configure all pins as inputs before reading ---
   for ( uint8_t id = 0; id < ph->QnttDIs; id++ )     //
     _set_pin_to_input( &ph->asPin[ id ] );
@@ -80,8 +78,10 @@ void DIM_Update( void *pArgs ) {
   uint16_t _NewRaw = 0;
   for ( uint8_t id = 0; id < ph->QnttDIs; id++ ) {
     psPin_t psPin = &ph->asPin[ id ];
-    if ( LL_GPIO_IsInputPinSet( psPin->psPort, psPin->Pin ) )     //
-      SET_BIT( _NewRaw, 1U << id );
+    if ( psPin->psPort ) {
+      if ( LL_GPIO_IsInputPinSet( psPin->psPort, psPin->Pin ) )     //
+        SET_BIT( _NewRaw, 1U << id );
+    }
   }
 
   // --- Step 3: Apply debounce and calculate new stable states ---
@@ -107,6 +107,36 @@ void DIM_Update( void *pArgs ) {
     _set_pin_to_output( &ph->asPin[ id ], _OutState );
   }
 
+  return;
+}
+
+/** --------------------------------------------------------------------------
+ * @brief   Set configuration parameters in the config structure.
+ */
+static void _set_cfg( void ) {
+  //
+  for ( size_t i = 0; i < DI_QNTT; i++ ) {
+    sCfg.aTau[ i ] = 50;     // 50 update cycles ~ 500 ms @ 100 Hz
+  }
+  sCfg.MaskForLED = 0x000F;     // Invert first 4 inputs on output
+  return;
+}
+
+/** --------------------------------------------------------------------------
+ * @brief   Set pin configurations in the pin array.
+ */
+static void _set_pins_cfg( void ) {
+  //
+  for ( size_t i = 0; i < DI_QNTT; i++ ) {
+    psPin_t _ps = &asPins[ i ];
+    switch ( i ) {     // clang-format off
+      case 0:  _ps->psPort = GPIOB; _ps->Pin = LL_GPIO_PIN_5;   break;     // PB5
+      case 1:  _ps->psPort = GPIOB; _ps->Pin = LL_GPIO_PIN_4;   break;     // PB4
+      case 2:  _ps->psPort = GPIOB; _ps->Pin = LL_GPIO_PIN_10;  break;     // PB10
+      case 3:  _ps->psPort = GPIOA; _ps->Pin = LL_GPIO_PIN_8;   break;     // PA8
+      default: _ps->psPort = NULL;  _ps->Pin = LL_GPIO_PIN_ALL; break;
+    }     // clang-format on
+  }
   return;
 }
 
@@ -138,8 +168,10 @@ static void _init_all_di_pins( phDIM_t ph ) {
  */
 static void _set_pin_to_input( psPin_t ps ) {
   //
-  LL_GPIO_SetPinPull( ps->psPort, ps->Pin, LL_GPIO_PULL_DOWN );
-  LL_GPIO_SetPinMode( ps->psPort, ps->Pin, LL_GPIO_MODE_INPUT );
+  if ( ps->psPort ) {
+    LL_GPIO_SetPinPull( ps->psPort, ps->Pin, LL_GPIO_PULL_DOWN );
+    LL_GPIO_SetPinMode( ps->psPort, ps->Pin, LL_GPIO_MODE_INPUT );
+  }
 
   return;
 }
@@ -154,11 +186,13 @@ static void _set_pin_to_output( psPin_t ps, bool PinState ) {
    * Set initial output state before switching to output mode
    * Configure as output, push-pull, low speed
    */
-  PinState ? LL_GPIO_SetOutputPin( ps->psPort, ps->Pin ) :
-             LL_GPIO_ResetOutputPin( ps->psPort, ps->Pin );
-  LL_GPIO_SetPinSpeed( ps->psPort, ps->Pin, LL_GPIO_SPEED_FREQ_LOW );
-  LL_GPIO_SetPinOutputType( ps->psPort, ps->Pin, LL_GPIO_OUTPUT_PUSHPULL );
-  LL_GPIO_SetPinMode( ps->psPort, ps->Pin, LL_GPIO_MODE_OUTPUT );
+  if ( ps->psPort ) {
+    PinState ? LL_GPIO_SetOutputPin( ps->psPort, ps->Pin ) :
+               LL_GPIO_ResetOutputPin( ps->psPort, ps->Pin );
+    LL_GPIO_SetPinSpeed( ps->psPort, ps->Pin, LL_GPIO_SPEED_FREQ_LOW );
+    LL_GPIO_SetPinOutputType( ps->psPort, ps->Pin, LL_GPIO_OUTPUT_PUSHPULL );
+    LL_GPIO_SetPinMode( ps->psPort, ps->Pin, LL_GPIO_MODE_OUTPUT );
+  }
 
   return;
 }
@@ -215,16 +249,6 @@ static bool _signal_update( psDI_Sig_t ps, bool RawNew, uint8_t Tau ) {
 
   return _NewStable;
 }
-
-/** --------------------------------------------------------------------------
- * @brief   Simple debounce filter implementation.
- * @param   Bit   The current raw input signal (true for high, false for low).
- * @param   Prev  The previous filtered value.
- * @param   Tau   The debounce time constant (number of consecutive samples
- *                required to change state).
- *
- * @return  The updated filtered value.
- */
 
 /** --------------------------------------------------------------------------
  * @brief   Simple debounce filter implementation with exponential smoothing.

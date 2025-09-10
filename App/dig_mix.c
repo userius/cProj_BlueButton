@@ -14,44 +14,26 @@ __STATIC_FORCEINLINE uint16_t _mix_apply_masks( psMOS_t psOuts, psMIX_MosMasks_t
 hMIX_t  hMIX;
 phMIX_t phMIX;
 
-// clang-format off
-sMIX_ChCfg_t asChannelCfg[ MIX_QNTT ] = {
-    {
-        .sMasksDIM      = { .StXOR = 0x0000, .State = 0x0001, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .sMasksMIX      = { .StXOR = 0x0000, .State = 0x0000, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .MaskUsage      = 0x00000001,
-        .eLogicOperation = MIX_LO_AND,
-    },
-    {
-        .sMasksDIM      = { .StXOR = 0x0000, .State = 0x0002, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .sMasksMIX      = { .StXOR = 0x0000, .State = 0x0000, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .MaskUsage      = 0x00000002,
-        .eLogicOperation = MIX_LO_AND,
-    },
-    {
-        .sMasksDIM      = { .StXOR = 0x0000, .State = 0x0004, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .sMasksMIX      = { .StXOR = 0x0000, .State = 0x0000, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .MaskUsage      = 0x00000004,
-        .eLogicOperation = MIX_LO_AND,
-    },
-    {
-        .sMasksDIM      = { .StXOR = 0x0000, .State = 0x0008, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .sMasksMIX      = { .StXOR = 0x0000, .State = 0x0000, .Rise  = 0x0000, .Fall  = 0x0000, },
-        .MaskUsage      = 0x00000008,
-        .eLogicOperation = MIX_LO_AND, 
-    },
-};     // clang-format on
+sMIX_ChCfg_t asChannelCfg[ MIX_QNTT ];
 
 sMIX_Cfg_t sCfgMIX = {
     .asChCfgs = asChannelCfg,
 };
-uint32_t aChannelsInput[ MIX_QNTT ] = { 0, 0, 0, 0 };
+uint32_t aChannelsInput[ MIX_QNTT ];
 
 /** ---------------------------------------------------------------------------
  * @brief   Initialize the digital mixer module.
  */
 void MIX_Init( void ) {
   //
+  for ( size_t i = 0; i < sizeof( asChannelCfg ); i++ ) ( (uint8_t *) asChannelCfg )[ i ] = 0;
+  for ( size_t i = 0; i < MIX_QNTT; i++ ) {
+    asChannelCfg[ i ].eLogicOperation = MIX_LO_AND;
+    asChannelCfg[ i ].sMasksDIM.State = 1U << i;
+    asChannelCfg[ i ].MaskUsage       = 1U << i;
+    aChannelsInput[ i ]               = 0;
+  }
+
   hMIX.psCfg          = &sCfgMIX;
   hMIX.aChannelsInput = aChannelsInput;
   hMIX.psOutsDIM      = &phDIM->sOutsDIM;

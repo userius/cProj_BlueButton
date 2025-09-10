@@ -9,7 +9,7 @@ extern "C"
 #include <stdbool.h>
 #include "dig_com.h"
 
-#define MIX_QNTT ( 4U )     // Number of MIX cannels, max 16
+#define MIX_QNTT ( 16U )     // Number of MIX cannels, max 16
 
   typedef enum _mix_logic_operations {
     MIX_LO_NONE = 0,
