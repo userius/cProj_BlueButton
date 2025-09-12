@@ -31,7 +31,7 @@ extern "C"
   typedef struct _dig_in_module_config {     // Configuration structure for DIM
     uint8_t  aTau[ DI_QNTT ];
     uint16_t MaskForLED;
-  } sDIM_Cfg_t, *psDIM_Cfg_t;
+  } sDIM_Cfg_t, *psDIM_Cfg_t;     // 18 bytes max
 
   /**
    * @brief   Digital Input Module Handler

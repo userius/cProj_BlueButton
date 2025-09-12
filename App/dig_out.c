@@ -40,6 +40,7 @@
 #include "dig_mix.h"
 
 /** Static function prototypes ***********************************************/
+
 static void          _dom_all_pins_init( phDOM_t ph );
 static void          _dom_all_pins_update( phDOM_t ph );
 static void          _dom_set_pins_cfg( void );
@@ -54,6 +55,7 @@ __STATIC_INLINE bool _dom_process_channel( hDOM_t *ph, uint8_t ChID,     //
                                            bool Activate, bool Deactivate );
 
 /** Variables ***************************************************************/
+
 /** ---------------------------------------------------------------------------
  * @brief   Pin configuration for digital outputs.
  *
@@ -79,6 +81,7 @@ hDOM_t  hDOM;
 hDOM_t *phDOM = NULL;
 
 /** Public functions ***********************************************************/
+
 /** ---------------------------------------------------------------------------
  * @brief Initialize the Digital Output Module (DOM).
  *

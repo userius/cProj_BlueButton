@@ -1,57 +1,89 @@
 
 /**  Modbus Mapping for Digital Input/Mixer/Output Module
-|==============================================================================================|
-| Data Model         | Function Codes  | Address Range   | Access | Description / Mapping      |
-|==============================================================================================|
-| Coils              | FC01 (Read),    | `00000 – 00003` | R      | `phDOM->OutStates`         |
-|                    | FC05 (Write),   |                 |        | `phDOM->sProtCtrl`         |
-|                    | FC15 (Wr.Mult.) | `00000 – 00003` | W      | `.Activate/Deactivate`     |
-|                    |                 | `00020 – 00023` | R/W    | `.KeepActive`              |
-|                    |                 | `00040 – 00043` | R/W    | `.KeepInactive`            |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| Discrete Inputs    | FC02 (Read)     | `10000 – 10015` | R      | `phDIM->sOutsDIM.States`   |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| Input Registers    | FC04 (Read)     | `30001`         | R      | `phDIM->sOutsDIM.States`   |
-|                    |                 | `30002`         | R      | `phMIX->sOutsMIX.States`   |
-|                    |                 | `30003`         | R      | `phDOM->OutStates`         |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| Holding Registers  | FC03 (Read),    | `40000 - 40003` | R/W    | `phDOM->sProtCtrl`         |
-|                    | FC06 (Write),   | `40000`         | R/W    | `.KeepInactive`            |
-|                    | FC16 (Wr.Mult.) | `40001`         | R/W    | `.KeepActive`              |
-|                    |                 | `40002`         | R/W    | `.Deactivate`              |
-|                    |                 | `40003`         | R/W    | `.Activate`                |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| DIM Block          | FC03/FC06/FC16  | `40101 – 40104` | R/W    | `phDIM->aTau[0..3]`        |
-|                    |                 | `40117`         | R/W    | `phDIM->MaskForLED`        |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| MIX Block          |                 |                 |        | `phMIX->psCfg`             |
-| MIX Channel 0      | FC03/FC06/FC16  | `40200 – 40210` | R/W    | `->asChCfgs[ 0 ]`          |
-|                    |                 | `40200`         | R/W    | `.sMasksDIM.StXOR`         |
-|                    |                 | `40201`         | R/W    | `.sMasksDIM.State`         |
-|                    |                 | `40202`         | R/W    | `.sMasksDIM.Rise`          |
-|                    |                 | `40203`         | R/W    | `.sMasksDIM.Fall`          |
-|                    |                 | `40204`         | R/W    | `.sMasksMIX.StXOR`         |
-|                    |                 | `40205`         | R/W    | `.sMasksMIX.State`         |
-|                    |                 | `40206`         | R/W    | `.sMasksMIX.Rise`          |
-|                    |                 | `40207`         | R/W    | `.sMasksMIX.Fall`          |
-|                    |                 | `40208`         | R/W    | `.MaskUsage & 0x0000FFFFF` |
-|                    |                 | `40209`         | R/W    | `.MaskUsage >> 16`         |
-|                    |                 | `40210`         | R/W    | `.LogicOperation`          |
-| MIX Channel 1      | FC03/FC06/FC16  | `40220 – 40230` | R/W    | `same layout as Channel 0` |
-| MIX Channel 3      | FC03/FC06/FC16  | `40240 – 40250` | R/W    | `same layout as Channel 0` |
-| MIX Channel 3      | FC03/FC06/FC16  | `40260 – 40270` | R/W    | `same layout as Channel 0` |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
-| DOM Block          |                 |                 |        | `phDOM->psCfg`             |
-| DOM Channel 0      | FC03/FC06/FC16  | `40500 – 40503` | R/W    | `->asChCfg[ 3 ]`           |
-|                    |                 | `40500`         | R/W    | `.uAct.RegSrcID`           |
-|                    |                 | `40501`         | R/W    | `.uDeact.RegSrcID`         |
-|                    |                 | `40502`         | R/W    | `.uCfgTDA.RegTimCgf`       |
-|                    |                 | `40503`         | R/W    | `.uCfgTHO.RegTimCgf`       |
-| DOM Channel 1      | FC03/FC06/FC16  | `40504 – 40507` | R/W    | `same layout as Channel 0` |
-| DOM Channel 3      | FC03/FC06/FC16  | `40508 – 40511` | R/W    | `same layout as Channel 0` |
-| DOM Channel 3      | FC03/FC06/FC16  | `40512 – 40515` | R/W    | `same layout as Channel 0` |
-|                    |                 | `40516`         | R/W    | `->OutsMaskXOR[0..3]`      |
-| ------------------ | --------------- | --------------- | ------ | -------------------------- |
+|==========================================================================================|
+| Data Model     | Function Codes  | Address Range   | Access | Description / Mapping      |
+|==========================================================================================|
+| Coils          | FC01 (Read),    | `00000 – 00003` | R      | `phDOM->OutStates`         |
+|                | FC05 (Write),   |                 |        | `phDOM->sProtCtrl`         |
+|                | FC15 (Wr.Mult.) | `00000 – 00003` | W      | `.Activate/Deactivate`     |
+|                |                 | `00020 – 00023` | R/W    | `.KeepActive`              |
+|                |                 | `00040 – 00043` | R/W    | `.KeepInactive`            |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| Discrete       | FC02 (Read)     | `10000 – 10015` | R      | `phDIM->sOutsDIM.States`   |
+| Inputs         |                 |                 |        |                            |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| Input          | FC04 (Read)     | `30001`         | R      | `phDIM->sOutsDIM.States`   |
+| Registers      |                 | `30002`         | R      | `phMIX->sOutsMIX.States`   |
+|                |                 | `30003`         | R      | `phDOM->OutStates`         |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| Holding        | FC03 (Read),    | `40000 - 40003` | R/W    | `phDOM->sProtCtrl`         |
+| Registers      | FC06 (Write),   | `40000`         | R/W    | `.KeepInactive`            |
+|                | FC16 (Wr.Mult.) | `40001`         | R/W    | `.KeepActive`              |
+|                |                 | `40002`         | R/W    | `.Deactivate`              |
+|                |                 | `40003`         | R/W    | `.Activate`                |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| MB RTU         | FC03/FC06/FC16  | `40050`         | R/W    | `sMbRtuSlvCfg.SlaveID`     |
+| Slave Cfg      |                 | `40051`         | R      | `sMbRtuSlvCfg.PortID`      |
+|                |                 | `40052`         | R/W    | `sMbRtuSlvCfg.BaudrateID`  |
+|                |                 | `40053`         | R      | `sMbRtuSlvCfg.DatabitsID`  |
+|                |                 | `40054`         | R/W    | `sMbRtuSlvCfg.StopBitsID`  |
+|                |                 | `40055`         | R/W    | `sMbRtuSlvCfg.ParityID`    |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| DIM Block      | FC03/FC06/FC16  | `40100 – 40115` | R/W    | `phDIM->aTau[0..3]`        |
+|                |                 | `40116`         | R/W    | `phDIM->MaskForLED`        |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| MIX Block      |                 |                 |        | `phMIX->psCfg`             |
+| MIX Channel 0  | FC03/FC06/FC16  | `40200 – 40210` | R/W    | `->asChCfgs[ 0 ]`          |
+|                |                 | `40200`         | R/W    | `.sMasksDIM.StXOR`         |
+|                |                 | `40201`         | R/W    | `.sMasksDIM.State`         |
+|                |                 | `40202`         | R/W    | `.sMasksDIM.Rise`          |
+|                |                 | `40203`         | R/W    | `.sMasksDIM.Fall`          |
+|                |                 | `40204`         | R/W    | `.sMasksMIX.StXOR`         |
+|                |                 | `40205`         | R/W    | `.sMasksMIX.State`         |
+|                |                 | `40206`         | R/W    | `.sMasksMIX.Rise`          |
+|                |                 | `40207`         | R/W    | `.sMasksMIX.Fall`          |
+|                |                 | `40208`         | R/W    | `.MaskUsage & 0x0000FFFFF` |
+|                |                 | `40209`         | R/W    | `.MaskUsage >> 16`         |
+|                |                 | `40210`         | R/W    | `.LogicOperation`          |
+| MIX Channel 1  | FC03/FC06/FC16  | `40220 – 40230` | R/W    | `same layout as Channel 0` |
+| MIX Channel 2  | FC03/FC06/FC16  | `40240 – 40250` | R/W    | `same layout as Channel 0` |
+| MIX Channel 3  | FC03/FC06/FC16  | `40260 – 40270` | R/W    | `same layout as Channel 0` |
+| MIX Channel 4  | FC03/FC06/FC16  | `40280 – 40290` | R/W    | `same layout as Channel 0` |
+| MIX Channel 5  | FC03/FC06/FC16  | `40300 – 40310` | R/W    | `same layout as Channel 0` |
+| MIX Channel 6  | FC03/FC06/FC16  | `40320 – 40330` | R/W    | `same layout as Channel 0` |
+| MIX Channel 7  | FC03/FC06/FC16  | `40340 – 40350` | R/W    | `same layout as Channel 0` |
+| MIX Channel 8  | FC03/FC06/FC16  | `40360 – 40370` | R/W    | `same layout as Channel 0` |
+| MIX Channel 9  | FC03/FC06/FC16  | `40380 – 40390` | R/W    | `same layout as Channel 0` |
+| MIX Channel 10 | FC03/FC06/FC16  | `40400 – 40410` | R/W    | `same layout as Channel 0` |
+| MIX Channel 11 | FC03/FC06/FC16  | `40420 – 40430` | R/W    | `same layout as Channel 0` |
+| MIX Channel 12 | FC03/FC06/FC16  | `40440 – 40450` | R/W    | `same layout as Channel 0` |
+| MIX Channel 13 | FC03/FC06/FC16  | `40460 – 40470` | R/W    | `same layout as Channel 0` |
+| MIX Channel 14 | FC03/FC06/FC16  | `40480 – 40490` | R/W    | `same layout as Channel 0` |
+| MIX Channel 15 | FC03/FC06/FC16  | `40500 – 40510` | R/W    | `same layout as Channel 0` |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
+| DOM Block      |                 |                 |        | `phDOM->psCfg`             |
+| DOM Channel 0  | FC03/FC06/FC16  | `40600 – 40603` | R/W    | `->asChCfg[ 0 ]`           |
+|                |                 | `40600`         | R/W    | `.uAct.RegSrcID`           |
+|                |                 | `40601`         | R/W    | `.uDeact.RegSrcID`         |
+|                |                 | `40602`         | R/W    | `.uCfgTDA.RegTimCgf`       |
+|                |                 | `40603`         | R/W    | `.uCfgTHO.RegTimCgf`       |
+| DOM Channel 1  | FC03/FC06/FC16  | `40604 – 40607` | R/W    | `same layout as Channel 0` |
+| DOM Channel 2  | FC03/FC06/FC16  | `40608 – 40611` | R/W    | `same layout as Channel 0` |
+| DOM Channel 3  | FC03/FC06/FC16  | `40612 – 40615` | R/W    | `same layout as Channel 0` |
+| DOM Channel 4  | FC03/FC06/FC16  | `40616 – 40619` | R/W    | `same layout as Channel 0` |
+| DOM Channel 5  | FC03/FC06/FC16  | `40620 – 40623` | R/W    | `same layout as Channel 0` |
+| DOM Channel 6  | FC03/FC06/FC16  | `40624 – 40627` | R/W    | `same layout as Channel 0` |
+| DOM Channel 7  | FC03/FC06/FC16  | `40628 – 40631` | R/W    | `same layout as Channel 0` |
+| DOM Channel 8  | FC03/FC06/FC16  | `40632 – 40635` | R/W    | `same layout as Channel 0` |
+| DOM Channel 9  | FC03/FC06/FC16  | `40636 – 40639` | R/W    | `same layout as Channel 0` |
+| DOM Channel 10 | FC03/FC06/FC16  | `40640 – 40643` | R/W    | `same layout as Channel 0` |
+| DOM Channel 11 | FC03/FC06/FC16  | `40644 – 40647` | R/W    | `same layout as Channel 0` |
+| DOM Channel 12 | FC03/FC06/FC16  | `40648 – 40651` | R/W    | `same layout as Channel 0` |
+| DOM Channel 13 | FC03/FC06/FC16  | `40652 – 40655` | R/W    | `same layout as Channel 0` |
+| DOM Channel 14 | FC03/FC06/FC16  | `40656 – 40659` | R/W    | `same layout as Channel 0` |
+| DOM Channel 15 | FC03/FC06/FC16  | `40660 – 40663` | R/W    | `same layout as Channel 0` |
+|                |                 | `40664`         | R/W    | `->OutsMaskXOR[0..3]`      |
+| -------------- | --------------- | --------------- | ------ | -------------------------- |
  */
 
 #include "main.h"
@@ -277,84 +309,311 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
   FnRes_t _Err = TBX_MB_SERVER_OK;
   TBX_UNUSED_ARG( ph );
   switch ( Addr ) {
+    /* Modbus control registers -------------------------------------------- */
     case 40000U: *pVal = phDOM->sProtCtrl.KeepInactive; break;
     case 40001U: *pVal = phDOM->sProtCtrl.KeepActive; break;
     case 40002U: *pVal = phDOM->sProtCtrl.Deactivate; break;
     case 40003U: *pVal = phDOM->sProtCtrl.Activate; break;
-    // DIM config registers
-    case 40100U:
-    case 40101U:
-    case 40102U:
-    case 40103U: *pVal = phDIM->psCfg->aTau[ Addr - 40100 ]; break;
-    case 40116U: *pVal = phDIM->psCfg->MaskForLED; break;
-    // MIX config registers
-    case 40200U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.StXOR; break;
-    case 40201U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.State; break;
-    case 40202U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Rise; break;
-    case 40203U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Fall; break;
-    case 40204U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.StXOR; break;
-    case 40205U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.State; break;
-    case 40206U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Rise; break;
-    case 40207U: *pVal = phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Fall; break;
-    case 40208U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 0 ]; break;
-    case 40209U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 1 ]; break;
-    case 40210U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 0 ].eLogicOperation; break;
-    case 40220U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.StXOR; break;
-    case 40221U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.State; break;
-    case 40222U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Rise; break;
-    case 40223U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Fall; break;
-    case 40224U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.StXOR; break;
-    case 40225U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.State; break;
-    case 40226U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Rise; break;
-    case 40227U: *pVal = phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Fall; break;
-    case 40228U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 0 ]; break;
-    case 40229U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 1 ]; break;
-    case 40230U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 1 ].eLogicOperation; break;
-    case 40240U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.StXOR; break;
-    case 40241U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.State; break;
-    case 40242U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Rise; break;
-    case 40243U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Fall; break;
-    case 40244U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.StXOR; break;
-    case 40245U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.State; break;
-    case 40246U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Rise; break;
-    case 40247U: *pVal = phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Fall; break;
-    case 40248U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 0 ]; break;
-    case 40249U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 1 ]; break;
-    case 40250U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 2 ].eLogicOperation; break;
-    case 40260U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.StXOR; break;
-    case 40261U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.State; break;
-    case 40262U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Rise; break;
-    case 40263U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Fall; break;
-    case 40264U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.StXOR; break;
-    case 40265U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.State; break;
-    case 40266U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Rise; break;
-    case 40267U: *pVal = phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Fall; break;
-    case 40268U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 0 ]; break;
-    case 40269U: *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 1 ]; break;
-    case 40270U: *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ 3 ].eLogicOperation; break;
-    // DOM config registers
-    case 40500U: *pVal = phDOM->psCfg->asChCfg[ 0 ].uAct.RegSrcID; break;
-    case 40501U: *pVal = phDOM->psCfg->asChCfg[ 0 ].uDeact.RegSrcID; break;
-    case 40502U: *pVal = phDOM->psCfg->asChCfg[ 0 ].uCfgTDA.RegTimCgf; break;
-    case 40503U: *pVal = phDOM->psCfg->asChCfg[ 0 ].uCfgTHO.RegTimCgf; break;
-    case 40504U: *pVal = phDOM->psCfg->asChCfg[ 1 ].uAct.RegSrcID; break;
-    case 40505U: *pVal = phDOM->psCfg->asChCfg[ 1 ].uDeact.RegSrcID; break;
-    case 40506U: *pVal = phDOM->psCfg->asChCfg[ 1 ].uCfgTDA.RegTimCgf; break;
-    case 40507U: *pVal = phDOM->psCfg->asChCfg[ 1 ].uCfgTHO.RegTimCgf; break;
-    case 40508U: *pVal = phDOM->psCfg->asChCfg[ 2 ].uAct.RegSrcID; break;
-    case 40509U: *pVal = phDOM->psCfg->asChCfg[ 2 ].uDeact.RegSrcID; break;
-    case 40510U: *pVal = phDOM->psCfg->asChCfg[ 2 ].uCfgTDA.RegTimCgf; break;
-    case 40511U: *pVal = phDOM->psCfg->asChCfg[ 2 ].uCfgTHO.RegTimCgf; break;
-    case 40512U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uAct.RegSrcID; break;
-    case 40513U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uDeact.RegSrcID; break;
-    case 40514U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uCfgTDA.RegTimCgf; break;
-    case 40515U: *pVal = phDOM->psCfg->asChCfg[ 3 ].uCfgTHO.RegTimCgf; break;
-    // DOM out pins mask
-    case 40564U: *pVal = phDOM->psCfg->OutsMaskXOR; break;
 
-    default:     // Unsupported input register address.
-      _Err = TBX_MB_SERVER_ERR_ILLEGAL_DATA_ADDR;
+    /* DIM config registers ------------------------------------------------ */
+    case 40100U:     // DIM channel 0
+    case 40101U:     // DIM channel 1
+    case 40102U:     // DIM channel 2
+    case 40103U:     // DIM channel 3
+    case 40104U:     // DIM channel 4
+    case 40105U:     // DIM channel 5
+    case 40106U:     // DIM channel 6
+    case 40107U:     // DIM channel 7
+    case 40108U:     // DIM channel 8
+    case 40109U:     // DIM channel 9
+    case 40110U:     // DIM channel 10
+    case 40111U:     // DIM channel 11
+    case 40112U:     // DIM channel 12
+    case 40113U:     // DIM channel 13
+    case 40114U:     // DIM channel 14
+    case 40115U:     // DIM channel 15
+      *pVal = phDIM->psCfg->aTau[ Addr - 40100 ];
       break;
+    case 40116U: *pVal = phDIM->psCfg->MaskForLED; break;
+
+    /* MIX config registers ------------------------------------------------ */
+    case 40200U:     // MIX channel 0
+    case 40220U:     // MIX channel 1
+    case 40240U:     // MIX channel 2
+    case 40260U:     // MIX channel 3
+    case 40280U:     // MIX channel 4
+    case 40300U:     // MIX channel 5
+    case 40320U:     // MIX channel 6
+    case 40340U:     // MIX channel 7
+    case 40360U:     // MIX channel 8
+    case 40380U:     // MIX channel 9
+    case 40400U:     // MIX channel 10
+    case 40420U:     // MIX channel 11
+    case 40440U:     // MIX channel 12
+    case 40460U:     // MIX channel 13
+    case 40480U:     // MIX channel 14
+    case 40500U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.StXOR;
+      break;
+    case 40201U:     // MIX channel 0
+    case 40221U:     // MIX channel 1
+    case 40241U:     // MIX channel 2
+    case 40261U:     // MIX channel 3
+    case 40281U:     // MIX channel 4
+    case 40301U:     // MIX channel 5
+    case 40321U:     // MIX channel 6
+    case 40341U:     // MIX channel 7
+    case 40361U:     // MIX channel 8
+    case 40381U:     // MIX channel 9
+    case 40401U:     // MIX channel 10
+    case 40421U:     // MIX channel 11
+    case 40441U:     // MIX channel 12
+    case 40461U:     // MIX channel 13
+    case 40481U:     // MIX channel 14
+    case 40501U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.State;
+      break;
+    case 40202U:     // MIX channel 0
+    case 40222U:     // MIX channel 1
+    case 40242U:     // MIX channel 2
+    case 40262U:     // MIX channel 3
+    case 40282U:     // MIX channel 4
+    case 40302U:     // MIX channel 5
+    case 40322U:     // MIX channel 6
+    case 40342U:     // MIX channel 7
+    case 40362U:     // MIX channel 8
+    case 40382U:     // MIX channel 9
+    case 40402U:     // MIX channel 10
+    case 40422U:     // MIX channel 11
+    case 40442U:     // MIX channel 12
+    case 40462U:     // MIX channel 13
+    case 40482U:     // MIX channel 14
+    case 40502U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.Rise;
+      break;
+    case 40203U:     // MIX channel 0
+    case 40223U:     // MIX channel 1
+    case 40243U:     // MIX channel 2
+    case 40263U:     // MIX channel 3
+    case 40283U:     // MIX channel 4
+    case 40303U:     // MIX channel 5
+    case 40323U:     // MIX channel 6
+    case 40343U:     // MIX channel 7
+    case 40363U:     // MIX channel 8
+    case 40383U:     // MIX channel 9
+    case 40403U:     // MIX channel 10
+    case 40423U:     // MIX channel 11
+    case 40443U:     // MIX channel 12
+    case 40463U:     // MIX channel 13
+    case 40483U:     // MIX channel 14
+    case 40503U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.Fall;
+      break;
+    case 40204U:     // MIX channel 0
+    case 40224U:     // MIX channel 1
+    case 40244U:     // MIX channel 2
+    case 40264U:     // MIX channel 3
+    case 40284U:     // MIX channel 4
+    case 40304U:     // MIX channel 5
+    case 40324U:     // MIX channel 6
+    case 40344U:     // MIX channel 7
+    case 40364U:     // MIX channel 8
+    case 40384U:     // MIX channel 9
+    case 40404U:     // MIX channel 10
+    case 40424U:     // MIX channel 11
+    case 40444U:     // MIX channel 12
+    case 40464U:     // MIX channel 13
+    case 40484U:     // MIX channel 14
+    case 40504U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.StXOR;
+      break;
+    case 40205U:     // MIX channel 0
+    case 40225U:     // MIX channel 1
+    case 40245U:     // MIX channel 2
+    case 40265U:     // MIX channel 3
+    case 40285U:     // MIX channel 4
+    case 40305U:     // MIX channel 5
+    case 40325U:     // MIX channel 6
+    case 40345U:     // MIX channel 7
+    case 40365U:     // MIX channel 8
+    case 40385U:     // MIX channel 9
+    case 40405U:     // MIX channel 10
+    case 40425U:     // MIX channel 11
+    case 40445U:     // MIX channel 12
+    case 40465U:     // MIX channel 13
+    case 40485U:     // MIX channel 14
+    case 40505U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.State;
+      break;
+    case 40206U:     // MIX channel 0
+    case 40226U:     // MIX channel 1
+    case 40246U:     // MIX channel 2
+    case 40266U:     // MIX channel 3
+    case 40286U:     // MIX channel 4
+    case 40306U:     // MIX channel 5
+    case 40326U:     // MIX channel 6
+    case 40346U:     // MIX channel 7
+    case 40366U:     // MIX channel 8
+    case 40386U:     // MIX channel 9
+    case 40406U:     // MIX channel 10
+    case 40426U:     // MIX channel 11
+    case 40446U:     // MIX channel 12
+    case 40466U:     // MIX channel 13
+    case 40486U:     // MIX channel 14
+    case 40506U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.Rise;
+      break;
+    case 40207U:     // MIX channel 0
+    case 40227U:     // MIX channel 1
+    case 40247U:     // MIX channel 2
+    case 40267U:     // MIX channel 3
+    case 40287U:     // MIX channel 4
+    case 40307U:     // MIX channel 5
+    case 40327U:     // MIX channel 6
+    case 40347U:     // MIX channel 7
+    case 40367U:     // MIX channel 8
+    case 40387U:     // MIX channel 9
+    case 40407U:     // MIX channel 10
+    case 40427U:     // MIX channel 11
+    case 40447U:     // MIX channel 12
+    case 40467U:     // MIX channel 13
+    case 40487U:     // MIX channel 14
+    case 40507U:     // MIX channel 15
+      *pVal = phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.Fall;
+      break;
+    case 40208U:     // MIX channel 0
+    case 40228U:     // MIX channel 1
+    case 40248U:     // MIX channel 2
+    case 40268U:     // MIX channel 3
+    case 40288U:     // MIX channel 4
+    case 40308U:     // MIX channel 5
+    case 40328U:     // MIX channel 6
+    case 40348U:     // MIX channel 7
+    case 40368U:     // MIX channel 8
+    case 40388U:     // MIX channel 9
+    case 40408U:     // MIX channel 10
+    case 40428U:     // MIX channel 11
+    case 40448U:     // MIX channel 12
+    case 40468U:     // MIX channel 13
+    case 40488U:     // MIX channel 14
+    case 40508U:     // MIX channel 15
+      *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].MaskUsage )[ 0 ];
+      break;
+    case 40209U:     // MIX channel 0
+    case 40229U:     // MIX channel 1
+    case 40249U:     // MIX channel 2
+    case 40269U:     // MIX channel 3
+    case 40289U:     // MIX channel 4
+    case 40309U:     // MIX channel 5
+    case 40329U:     // MIX channel 6
+    case 40349U:     // MIX channel 7
+    case 40369U:     // MIX channel 8
+    case 40389U:     // MIX channel 9
+    case 40409U:     // MIX channel 10
+    case 40429U:     // MIX channel 11
+    case 40449U:     // MIX channel 12
+    case 40469U:     // MIX channel 13
+    case 40489U:     // MIX channel 14
+    case 40509U:     // MIX channel 15
+      *pVal = ( (uint16_t *) &phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].MaskUsage )[ 1 ];
+      break;
+    case 40210U:     // MIX channel 0
+    case 40230U:     // MIX channel 1
+    case 40250U:     // MIX channel 2
+    case 40270U:     // MIX channel 3
+    case 40290U:     // MIX channel 4
+    case 40310U:     // MIX channel 5
+    case 40330U:     // MIX channel 6
+    case 40350U:     // MIX channel 7
+    case 40370U:     // MIX channel 8
+    case 40390U:     // MIX channel 9
+    case 40410U:     // MIX channel 10
+    case 40430U:     // MIX channel 11
+    case 40450U:     // MIX channel 12
+    case 40470U:     // MIX channel 13
+    case 40490U:     // MIX channel 14
+    case 40510U:     // MIX channel 15
+      *pVal = (uint16_t) phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].eLogicOperation;
+      break;
+
+    /* DOM config registers ------------------------------------------------ */
+    case 40600U:     // DOM channel 0
+    case 40604U:     // DOM channel 1
+    case 40608U:     // DOM channel 2
+    case 40612U:     // DOM channel 3
+    case 40616U:     // DOM channel 4
+    case 40620U:     // DOM channel 5
+    case 40624U:     // DOM channel 6
+    case 40628U:     // DOM channel 7
+    case 40632U:     // DOM channel 8
+    case 40636U:     // DOM channel 9
+    case 40640U:     // DOM channel 10
+    case 40644U:     // DOM channel 11
+    case 40648U:     // DOM channel 12
+    case 40652U:     // DOM channel 13
+    case 40656U:     // DOM channel 14
+    case 40660U:     // DOM channel 15
+      *pVal = phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uAct.RegSrcID;
+      break;
+    case 40601U:     // DOM channel 0
+    case 40605U:     // DOM channel 1
+    case 40609U:     // DOM channel 2
+    case 40613U:     // DOM channel 3
+    case 40617U:     // DOM channel 4
+    case 40621U:     // DOM channel 5
+    case 40625U:     // DOM channel 6
+    case 40629U:     // DOM channel 7
+    case 40633U:     // DOM channel 8
+    case 40637U:     // DOM channel 9
+    case 40641U:     // DOM channel 10
+    case 40645U:     // DOM channel 11
+    case 40649U:     // DOM channel 12
+    case 40653U:     // DOM channel 13
+    case 40657U:     // DOM channel 14
+    case 40661U:     // DOM channel 15
+      *pVal = phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uDeact.RegSrcID;
+      break;
+    case 40602U:     // DOM channel 0
+    case 40606U:     // DOM channel 1
+    case 40610U:     // DOM channel 2
+    case 40614U:     // DOM channel 3
+    case 40618U:     // DOM channel 4
+    case 40622U:     // DOM channel 5
+    case 40626U:     // DOM channel 6
+    case 40630U:     // DOM channel 7
+    case 40634U:     // DOM channel 8
+    case 40638U:     // DOM channel 9
+    case 40642U:     // DOM channel 10
+    case 40646U:     // DOM channel 11
+    case 40650U:     // DOM channel 12
+    case 40654U:     // DOM channel 13
+    case 40658U:     // DOM channel 14
+    case 40662U:     // DOM channel 15
+      *pVal = phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uCfgTDA.RegTimCgf;
+      break;
+    case 40603U:     // DOM channel 0
+    case 40607U:     // DOM channel 1
+    case 40611U:     // DOM channel 2
+    case 40615U:     // DOM channel 3
+    case 40619U:     // DOM channel 4
+    case 40623U:     // DOM channel 5
+    case 40627U:     // DOM channel 6
+    case 40631U:     // DOM channel 7
+    case 40635U:     // DOM channel 8
+    case 40639U:     // DOM channel 9
+    case 40643U:     // DOM channel 10
+    case 40647U:     // DOM channel 11
+    case 40651U:     // DOM channel 12
+    case 40655U:     // DOM channel 13
+    case 40659U:     // DOM channel 14
+    case 40663U:     // DOM channel 15
+      *pVal = phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uCfgTHO.RegTimCgf;
+      break;
+    // DOM out pins mask
+    case 40664U: *pVal = phDOM->psCfg->OutsMaskXOR; break;
+
+    /* Unsupported input register address. --------------------------------- */
+    default: _Err = TBX_MB_SERVER_ERR_ILLEGAL_DATA_ADDR; break;
   }
 
   return _Err;
@@ -378,93 +637,311 @@ static FnRes_t _FC06_WriteHoldingReg( tTbxMbServer ph, uint16_t Addr, uint16_t V
   FnRes_t _Res = TBX_MB_SERVER_OK;
   TBX_UNUSED_ARG( ph );
   switch ( Addr ) {
+    /* Modbus control registers -------------------------------------------- */
     case 40000U: phDOM->sProtCtrl.KeepInactive = Val; break;
     case 40001U: phDOM->sProtCtrl.KeepActive = Val; break;
     case 40002U: phDOM->sProtCtrl.Deactivate = Val; break;
     case 40003U: phDOM->sProtCtrl.Activate = Val; break;
-    // DIM config registers
-    case 40100U:
-    case 40101U:
-    case 40102U:
-    case 40103U: phDIM->psCfg->aTau[ Addr - 40100 ] = Val; break;
-    case 40116U: phDIM->psCfg->MaskForLED = Val; break;
-    // MIX config registers
-    // MIX channel 0
-    case 40200U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.StXOR = Val; break;
-    case 40201U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.State = Val; break;
-    case 40202U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Rise = Val; break;
-    case 40203U: phMIX->psCfg->asChCfgs[ 0 ].sMasksDIM.Fall = Val; break;
-    case 40204U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.StXOR = Val; break;
-    case 40205U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.State = Val; break;
-    case 40206U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Rise = Val; break;
-    case 40207U: phMIX->psCfg->asChCfgs[ 0 ].sMasksMIX.Fall = Val; break;
-    case 40208U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 0 ] = Val; break;
-    case 40209U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 0 ].MaskUsage )[ 1 ] = Val; break;
-    case 40210U: phMIX->psCfg->asChCfgs[ 0 ].eLogicOperation = Val; break;
-    // MIX channel 1
-    case 40220U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.StXOR = Val; break;
-    case 40221U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.State = Val; break;
-    case 40222U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Rise = Val; break;
-    case 40223U: phMIX->psCfg->asChCfgs[ 1 ].sMasksDIM.Fall = Val; break;
-    case 40224U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.StXOR = Val; break;
-    case 40225U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.State = Val; break;
-    case 40226U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Rise = Val; break;
-    case 40227U: phMIX->psCfg->asChCfgs[ 1 ].sMasksMIX.Fall = Val; break;
-    case 40228U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 0 ] = Val; break;
-    case 40229U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 1 ].MaskUsage )[ 1 ] = Val; break;
-    case 40230U: phMIX->psCfg->asChCfgs[ 1 ].eLogicOperation = Val; break;
-    // MIX channel 2
-    case 40240U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.StXOR = Val; break;
-    case 40241U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.State = Val; break;
-    case 40242U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Rise = Val; break;
-    case 40243U: phMIX->psCfg->asChCfgs[ 2 ].sMasksDIM.Fall = Val; break;
-    case 40244U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.StXOR = Val; break;
-    case 40245U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.State = Val; break;
-    case 40246U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Rise = Val; break;
-    case 40247U: phMIX->psCfg->asChCfgs[ 2 ].sMasksMIX.Fall = Val; break;
-    case 40248U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 0 ] = Val; break;
-    case 40249U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 2 ].MaskUsage )[ 1 ] = Val; break;
-    case 40250U: phMIX->psCfg->asChCfgs[ 2 ].eLogicOperation = Val; break;
-    // MIX channel 3
-    case 40260U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.StXOR = Val; break;
-    case 40261U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.State = Val; break;
-    case 40262U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Rise = Val; break;
-    case 40263U: phMIX->psCfg->asChCfgs[ 3 ].sMasksDIM.Fall = Val; break;
-    case 40264U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.StXOR = Val; break;
-    case 40265U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.State = Val; break;
-    case 40266U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Rise = Val; break;
-    case 40267U: phMIX->psCfg->asChCfgs[ 3 ].sMasksMIX.Fall = Val; break;
-    case 40268U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 0 ] = Val; break;
-    case 40269U: ( (uint16_t *) &phMIX->psCfg->asChCfgs[ 3 ].MaskUsage )[ 1 ] = Val; break;
-    case 40270U: phMIX->psCfg->asChCfgs[ 3 ].eLogicOperation = Val; break;
-    // DOM config registers
-    // DOM channel 0
-    case 40500U: phDOM->psCfg->asChCfg[ 0 ].uAct.RegSrcID = Val; break;
-    case 40501U: phDOM->psCfg->asChCfg[ 0 ].uDeact.RegSrcID = Val; break;
-    case 40502U: phDOM->psCfg->asChCfg[ 0 ].uCfgTDA.RegTimCgf = Val; break;
-    case 40503U: phDOM->psCfg->asChCfg[ 0 ].uCfgTHO.RegTimCgf = Val; break;
-    // case 40503U: phDOM->psCfg->asChCfg[ (Addr - 40500) / 4 ].uCfgTHO.RegTimCgf = Val; break;
-    // DOM channel 1
-    case 40504U: phDOM->psCfg->asChCfg[ 1 ].uAct.RegSrcID = Val; break;
-    case 40505U: phDOM->psCfg->asChCfg[ 1 ].uDeact.RegSrcID = Val; break;
-    case 40506U: phDOM->psCfg->asChCfg[ 1 ].uCfgTDA.RegTimCgf = Val; break;
-    case 40507U: phDOM->psCfg->asChCfg[ 1 ].uCfgTHO.RegTimCgf = Val; break;
-    // DOM channel 2
-    case 40508U: phDOM->psCfg->asChCfg[ 2 ].uAct.RegSrcID = Val; break;
-    case 40509U: phDOM->psCfg->asChCfg[ 2 ].uDeact.RegSrcID = Val; break;
-    case 40510U: phDOM->psCfg->asChCfg[ 2 ].uCfgTDA.RegTimCgf = Val; break;
-    case 40511U: phDOM->psCfg->asChCfg[ 2 ].uCfgTHO.RegTimCgf = Val; break;
-    // DOM channel 3
-    case 40512U: phDOM->psCfg->asChCfg[ 3 ].uAct.RegSrcID = Val; break;
-    case 40513U: phDOM->psCfg->asChCfg[ 3 ].uDeact.RegSrcID = Val; break;
-    case 40514U: phDOM->psCfg->asChCfg[ 3 ].uCfgTDA.RegTimCgf = Val; break;
-    case 40515U: phDOM->psCfg->asChCfg[ 3 ].uCfgTHO.RegTimCgf = Val; break;
-    // DOM out pins mask
-    case 40564U: phDOM->psCfg->OutsMaskXOR = Val; break;
 
-    default:     // Unsupported holding register address.
-      _Res = TBX_MB_SERVER_ERR_ILLEGAL_DATA_ADDR;
+    /* DIM config registers ------------------------------------------------ */
+    case 40100U:     // DIM channel 0
+    case 40101U:     // DIM channel 1
+    case 40102U:     // DIM channel 2
+    case 40103U:     // DIM channel 3
+    case 40104U:     // DIM channel 4
+    case 40105U:     // DIM channel 5
+    case 40106U:     // DIM channel 6
+    case 40107U:     // DIM channel 7
+    case 40108U:     // DIM channel 8
+    case 40109U:     // DIM channel 9
+    case 40110U:     // DIM channel 10
+    case 40111U:     // DIM channel 11
+    case 40112U:     // DIM channel 12
+    case 40113U:     // DIM channel 13
+    case 40114U:     // DIM channel 14
+    case 40115U:     // DIM channel 15
+      phDIM->psCfg->aTau[ Addr - 40100 ] = Val;
       break;
+    case 40116U: phDIM->psCfg->MaskForLED = Val; break;
+
+    /* MIX config registers ------------------------------------------------ */
+    case 40200U:     // MIX channel 0
+    case 40220U:     // MIX channel 1
+    case 40240U:     // MIX channel 2
+    case 40260U:     // MIX channel 3
+    case 40280U:     // MIX channel 4
+    case 40300U:     // MIX channel 5
+    case 40320U:     // MIX channel 6
+    case 40340U:     // MIX channel 7
+    case 40360U:     // MIX channel 8
+    case 40380U:     // MIX channel 9
+    case 40400U:     // MIX channel 10
+    case 40420U:     // MIX channel 11
+    case 40440U:     // MIX channel 12
+    case 40460U:     // MIX channel 13
+    case 40480U:     // MIX channel 14
+    case 40500U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.StXOR = Val;
+      break;
+    case 40201U:     // MIX channel 0
+    case 40221U:     // MIX channel 1
+    case 40241U:     // MIX channel 2
+    case 40261U:     // MIX channel 3
+    case 40281U:     // MIX channel 4
+    case 40301U:     // MIX channel 5
+    case 40321U:     // MIX channel 6
+    case 40341U:     // MIX channel 7
+    case 40361U:     // MIX channel 8
+    case 40381U:     // MIX channel 9
+    case 40401U:     // MIX channel 10
+    case 40421U:     // MIX channel 11
+    case 40441U:     // MIX channel 12
+    case 40461U:     // MIX channel 13
+    case 40481U:     // MIX channel 14
+    case 40501U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.State = Val;
+      break;
+    case 40202U:     // MIX channel 0
+    case 40222U:     // MIX channel 1
+    case 40242U:     // MIX channel 2
+    case 40262U:     // MIX channel 3
+    case 40282U:     // MIX channel 4
+    case 40302U:     // MIX channel 5
+    case 40322U:     // MIX channel 6
+    case 40342U:     // MIX channel 7
+    case 40362U:     // MIX channel 8
+    case 40382U:     // MIX channel 9
+    case 40402U:     // MIX channel 10
+    case 40422U:     // MIX channel 11
+    case 40442U:     // MIX channel 12
+    case 40462U:     // MIX channel 13
+    case 40482U:     // MIX channel 14
+    case 40502U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.Rise = Val;
+      break;
+    case 40203U:     // MIX channel 0
+    case 40223U:     // MIX channel 1
+    case 40243U:     // MIX channel 2
+    case 40263U:     // MIX channel 3
+    case 40283U:     // MIX channel 4
+    case 40303U:     // MIX channel 5
+    case 40323U:     // MIX channel 6
+    case 40343U:     // MIX channel 7
+    case 40363U:     // MIX channel 8
+    case 40383U:     // MIX channel 9
+    case 40403U:     // MIX channel 10
+    case 40423U:     // MIX channel 11
+    case 40443U:     // MIX channel 12
+    case 40463U:     // MIX channel 13
+    case 40483U:     // MIX channel 14
+    case 40503U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksDIM.Fall = Val;
+      break;
+    case 40204U:     // MIX channel 0
+    case 40224U:     // MIX channel 1
+    case 40244U:     // MIX channel 2
+    case 40264U:     // MIX channel 3
+    case 40284U:     // MIX channel 4
+    case 40304U:     // MIX channel 5
+    case 40324U:     // MIX channel 6
+    case 40344U:     // MIX channel 7
+    case 40364U:     // MIX channel 8
+    case 40384U:     // MIX channel 9
+    case 40404U:     // MIX channel 10
+    case 40424U:     // MIX channel 11
+    case 40444U:     // MIX channel 12
+    case 40464U:     // MIX channel 13
+    case 40484U:     // MIX channel 14
+    case 40504U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.StXOR = Val;
+      break;
+    case 40205U:     // MIX channel 0
+    case 40225U:     // MIX channel 1
+    case 40245U:     // MIX channel 2
+    case 40265U:     // MIX channel 3
+    case 40285U:     // MIX channel 4
+    case 40305U:     // MIX channel 5
+    case 40325U:     // MIX channel 6
+    case 40345U:     // MIX channel 7
+    case 40365U:     // MIX channel 8
+    case 40385U:     // MIX channel 9
+    case 40405U:     // MIX channel 10
+    case 40425U:     // MIX channel 11
+    case 40445U:     // MIX channel 12
+    case 40465U:     // MIX channel 13
+    case 40485U:     // MIX channel 14
+    case 40505U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.State = Val;
+      break;
+    case 40206U:     // MIX channel 0
+    case 40226U:     // MIX channel 1
+    case 40246U:     // MIX channel 2
+    case 40266U:     // MIX channel 3
+    case 40286U:     // MIX channel 4
+    case 40306U:     // MIX channel 5
+    case 40326U:     // MIX channel 6
+    case 40346U:     // MIX channel 7
+    case 40366U:     // MIX channel 8
+    case 40386U:     // MIX channel 9
+    case 40406U:     // MIX channel 10
+    case 40426U:     // MIX channel 11
+    case 40446U:     // MIX channel 12
+    case 40466U:     // MIX channel 13
+    case 40486U:     // MIX channel 14
+    case 40506U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.Rise = Val;
+      break;
+    case 40207U:     // MIX channel 0
+    case 40227U:     // MIX channel 1
+    case 40247U:     // MIX channel 2
+    case 40267U:     // MIX channel 3
+    case 40287U:     // MIX channel 4
+    case 40307U:     // MIX channel 5
+    case 40327U:     // MIX channel 6
+    case 40347U:     // MIX channel 7
+    case 40367U:     // MIX channel 8
+    case 40387U:     // MIX channel 9
+    case 40407U:     // MIX channel 10
+    case 40427U:     // MIX channel 11
+    case 40447U:     // MIX channel 12
+    case 40467U:     // MIX channel 13
+    case 40487U:     // MIX channel 14
+    case 40507U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].sMasksMIX.Fall = Val;
+      break;
+    case 40208U:     // MIX channel 0
+    case 40228U:     // MIX channel 1
+    case 40248U:     // MIX channel 2
+    case 40268U:     // MIX channel 3
+    case 40288U:     // MIX channel 4
+    case 40308U:     // MIX channel 5
+    case 40328U:     // MIX channel 6
+    case 40348U:     // MIX channel 7
+    case 40368U:     // MIX channel 8
+    case 40388U:     // MIX channel 9
+    case 40408U:     // MIX channel 10
+    case 40428U:     // MIX channel 11
+    case 40448U:     // MIX channel 12
+    case 40468U:     // MIX channel 13
+    case 40488U:     // MIX channel 14
+    case 40508U:     // MIX channel 15
+      ( (uint16_t *) &phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].MaskUsage )[ 0 ] = Val;
+      break;
+    case 40209U:     // MIX channel 0
+    case 40229U:     // MIX channel 1
+    case 40249U:     // MIX channel 2
+    case 40269U:     // MIX channel 3
+    case 40289U:     // MIX channel 4
+    case 40309U:     // MIX channel 5
+    case 40329U:     // MIX channel 6
+    case 40349U:     // MIX channel 7
+    case 40369U:     // MIX channel 8
+    case 40389U:     // MIX channel 9
+    case 40409U:     // MIX channel 10
+    case 40429U:     // MIX channel 11
+    case 40449U:     // MIX channel 12
+    case 40469U:     // MIX channel 13
+    case 40489U:     // MIX channel 14
+    case 40509U:     // MIX channel 15
+      ( (uint16_t *) &phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].MaskUsage )[ 1 ] = Val;
+      break;
+    case 40210U:     // MIX channel 0
+    case 40230U:     // MIX channel 1
+    case 40250U:     // MIX channel 2
+    case 40270U:     // MIX channel 3
+    case 40290U:     // MIX channel 4
+    case 40310U:     // MIX channel 5
+    case 40330U:     // MIX channel 6
+    case 40350U:     // MIX channel 7
+    case 40370U:     // MIX channel 8
+    case 40390U:     // MIX channel 9
+    case 40410U:     // MIX channel 10
+    case 40430U:     // MIX channel 11
+    case 40450U:     // MIX channel 12
+    case 40470U:     // MIX channel 13
+    case 40490U:     // MIX channel 14
+    case 40510U:     // MIX channel 15
+      phMIX->psCfg->asChCfgs[ ( Addr - 40200 ) / 20 ].eLogicOperation = Val;
+      break;
+
+    /* DOM config registers ------------------------------------------------ */
+    case 40600U:     // DOM channel 0
+    case 40604U:     // DOM channel 1
+    case 40608U:     // DOM channel 2
+    case 40612U:     // DOM channel 3
+    case 40616U:     // DOM channel 4
+    case 40620U:     // DOM channel 5
+    case 40624U:     // DOM channel 6
+    case 40628U:     // DOM channel 7
+    case 40632U:     // DOM channel 8
+    case 40636U:     // DOM channel 9
+    case 40640U:     // DOM channel 10
+    case 40644U:     // DOM channel 11
+    case 40648U:     // DOM channel 12
+    case 40652U:     // DOM channel 13
+    case 40656U:     // DOM channel 14
+    case 40660U:     // DOM channel 15
+      phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uAct.RegSrcID = Val;
+      break;
+    case 40601U:     // DOM channel 0
+    case 40605U:     // DOM channel 1
+    case 40609U:     // DOM channel 2
+    case 40613U:     // DOM channel 3
+    case 40617U:     // DOM channel 4
+    case 40621U:     // DOM channel 5
+    case 40625U:     // DOM channel 6
+    case 40629U:     // DOM channel 7
+    case 40633U:     // DOM channel 8
+    case 40637U:     // DOM channel 9
+    case 40641U:     // DOM channel 10
+    case 40645U:     // DOM channel 11
+    case 40649U:     // DOM channel 12
+    case 40653U:     // DOM channel 13
+    case 40657U:     // DOM channel 14
+    case 40661U:     // DOM channel 15
+      phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uDeact.RegSrcID = Val;
+      break;
+    case 40602U:     // DOM channel 0
+    case 40606U:     // DOM channel 1
+    case 40610U:     // DOM channel 2
+    case 40614U:     // DOM channel 3
+    case 40618U:     // DOM channel 4
+    case 40622U:     // DOM channel 5
+    case 40626U:     // DOM channel 6
+    case 40630U:     // DOM channel 7
+    case 40634U:     // DOM channel 8
+    case 40638U:     // DOM channel 9
+    case 40642U:     // DOM channel 10
+    case 40646U:     // DOM channel 11
+    case 40650U:     // DOM channel 12
+    case 40654U:     // DOM channel 13
+    case 40658U:     // DOM channel 14
+    case 40662U:     // DOM channel 15
+      phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uCfgTDA.RegTimCgf = Val;
+      break;
+    case 40603U:     // DOM channel 0
+    case 40607U:     // DOM channel 1
+    case 40611U:     // DOM channel 2
+    case 40615U:     // DOM channel 3
+    case 40619U:     // DOM channel 4
+    case 40623U:     // DOM channel 5
+    case 40627U:     // DOM channel 6
+    case 40631U:     // DOM channel 7
+    case 40635U:     // DOM channel 8
+    case 40639U:     // DOM channel 9
+    case 40643U:     // DOM channel 10
+    case 40647U:     // DOM channel 11
+    case 40651U:     // DOM channel 12
+    case 40655U:     // DOM channel 13
+    case 40659U:     // DOM channel 14
+    case 40663U:     // DOM channel 15
+      phDOM->psCfg->asChCfg[ ( Addr - 40500 ) / 4 ].uCfgTHO.RegTimCgf = Val;
+      break;
+    // DOM out pins mask
+    case 40664U: phDOM->psCfg->OutsMaskXOR = Val; break;
+
+    /* Unsupported holding register address. ------------------------------- */
+    default: _Res = TBX_MB_SERVER_ERR_ILLEGAL_DATA_ADDR; break;
   }
 
   return _Res;
