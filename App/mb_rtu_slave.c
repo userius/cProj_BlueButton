@@ -92,6 +92,17 @@
 #include "dig_in.h"
 #include "dig_mix.h"
 #include "dig_out.h"
+#include "mb_rtu_slave.h"
+
+sMB_RTU_Slv_Cfg_t sMbRtuSlvCfg = {
+    .SlaveID    = 10U,                        //
+    .PortID     = TBX_MB_UART_PORT1,          //
+    .BaudrateID = TBX_MB_UART_19200BPS,       //
+    .DatabitsID = TBX_MB_UART_8_DATABITS,     //
+    .StopBitsID = TBX_MB_UART_1_STOPBITS,     //
+    .ParityID   = TBX_MB_EVEN_PARITY,         //
+};
+psMB_RTU_Slv_Cfg_t psMbRtuSlvCfg = &sMbRtuSlvCfg;
 
 typedef tTbxMbServerResult FnRes_t;
 
@@ -109,7 +120,7 @@ static tTbxMbTp     phTpMB;      // Modbus RTU transport layer handle.
 static tTbxMbServer phSrvMB;     // Modbus server channel handle.
 
 /** -------------------------------------------------------------------------
- * @brief Initializes the Modbus RTU slave.
+ * @brief   Initializes the Modbus RTU slave.
  * @details This function initializes the Modbus RTU slave stack, creates the Modbus RTU
  *          transport layer object, creates the Modbus server object, and sets the
  *          callbacks for accessing the Modbus data tables.
@@ -314,6 +325,14 @@ static FnRes_t _FC03_ReadHoldingRegs( tTbxMbServer ph, uint16_t Addr, uint16_t *
     case 40001U: *pVal = phDOM->sProtCtrl.KeepActive; break;
     case 40002U: *pVal = phDOM->sProtCtrl.Deactivate; break;
     case 40003U: *pVal = phDOM->sProtCtrl.Activate; break;
+
+    /* Modbus config registers --------------------------------------------- */
+    case 40050U: *pVal = psMbRtuSlvCfg->SlaveID; break;
+    case 40051U: *pVal = psMbRtuSlvCfg->PortID; break;
+    case 40052U: *pVal = psMbRtuSlvCfg->BaudrateID; break;
+    case 40053U: *pVal = psMbRtuSlvCfg->DatabitsID; break;
+    case 40054U: *pVal = psMbRtuSlvCfg->StopBitsID; break;
+    case 40055U: *pVal = psMbRtuSlvCfg->ParityID; break;
 
     /* DIM config registers ------------------------------------------------ */
     case 40100U:     // DIM channel 0
@@ -642,6 +661,14 @@ static FnRes_t _FC06_WriteHoldingReg( tTbxMbServer ph, uint16_t Addr, uint16_t V
     case 40001U: phDOM->sProtCtrl.KeepActive = Val; break;
     case 40002U: phDOM->sProtCtrl.Deactivate = Val; break;
     case 40003U: phDOM->sProtCtrl.Activate = Val; break;
+
+    /* Modbus config registers --------------------------------------------- */
+    case 40050U: psMbRtuSlvCfg->SlaveID = Val; break;
+    case 40051U: psMbRtuSlvCfg->PortID = Val; break;
+    case 40052U: psMbRtuSlvCfg->BaudrateID = Val; break;
+    case 40053U: psMbRtuSlvCfg->DatabitsID = Val; break;
+    case 40054U: psMbRtuSlvCfg->StopBitsID = Val; break;
+    case 40055U: psMbRtuSlvCfg->ParityID = Val; break;
 
     /* DIM config registers ------------------------------------------------ */
     case 40100U:     // DIM channel 0
